@@ -1,0 +1,241 @@
+package com.wit.travel.controller;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wit.travel.dto.ScenicAddDTO;
+import com.wit.travel.dto.ScenicQueryDTO;
+import com.wit.travel.entity.Scenic;
+import com.wit.travel.entity.ScenicCategory;
+import com.wit.travel.service.ScenicCategoryService;
+import com.wit.travel.service.ScenicService;
+import com.wit.travel.vo.Result;
+import com.wit.travel.vo.ScenicVO;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * 景点控制器
+ */
+@Slf4j
+@RestController
+@RequestMapping("/admin/scenic")
+public class ScenicController {
+
+    @Autowired
+    private ScenicService scenicService;
+
+    // 引入JSON工具（Jackson）
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private ScenicCategoryService scenicCategoryService;
+
+    @GetMapping("/list")
+    public Result<IPage<ScenicVO>> getScenicList(ScenicQueryDTO queryDTO) {
+        Page<ScenicVO> page = new Page<>(queryDTO.getPageNum() != null ? queryDTO.getPageNum() : 1,
+                queryDTO.getPageSize() != null ? queryDTO.getPageSize() : 10);
+        IPage<ScenicVO> voPage = scenicService.getScenicVOList(page, queryDTO);
+        return Result.success(voPage);
+    }
+
+    // 审核景点
+    @PutMapping("/{id}/audit")
+    public Result<String> auditScenic(@PathVariable Long id, @RequestParam Integer status) {
+        try {
+            Scenic scenic = scenicService.getById(id);
+            if (scenic == null) {
+                return Result.error("景点不存在");
+            }
+            scenic.setStatus(status);
+            boolean updated = scenicService.updateById(scenic);
+            return updated ? Result.success("审核成功") : Result.error("审核失败");
+        } catch (Exception e) {
+            log.error("审核景点异常，ID：{}，异常：", id, e);
+            return Result.error("服务器内部错误");
+        }
+    }
+
+    // 设置景点推荐等级
+    @PutMapping("/{id}/recommend-level")
+    public Result<String> setRecommendLevel(@PathVariable Long id, @RequestParam Integer recommendLevel) {
+        try {
+            Scenic scenic = scenicService.getById(id);
+            if (scenic == null) {
+                return Result.error("景点不存在");
+            }
+            scenic.setRecommendLevel(recommendLevel);
+            boolean updated = scenicService.updateById(scenic);
+            return updated ? Result.success("推荐等级设置成功") : Result.error("设置失败");
+        } catch (Exception e) {
+            log.error("设置推荐等级异常，ID：{}，异常：", id, e);
+            return Result.error("服务器内部错误");
+        }
+    }
+
+    @GetMapping("/{id}")
+    public Result<ScenicVO> getScenicById(@PathVariable Long id) {
+        ScenicVO vo = scenicService.getScenicVOById(id);
+        if (vo == null) {
+            return Result.error("景点不存在");
+        }
+        return Result.success(vo);
+    }
+
+    @GetMapping("/recommend")
+    public Result<List<ScenicVO>> getRecommendScenic(@RequestParam(defaultValue = "10") Integer limit) {
+        List<ScenicVO> voList = scenicService.getRecommendScenicVOList(limit);
+        return Result.success(voList);
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public Result<List<ScenicVO>> getScenicByCategory(@PathVariable Long categoryId) {
+        List<ScenicVO> voList = scenicService.getScenicVOByCategoryId(categoryId);
+        return Result.success(voList);
+    }
+
+    @GetMapping("/tag/{tagId}")
+    public Result<List<ScenicVO>> getScenicByTag(@PathVariable Long tagId) {
+        List<ScenicVO> voList = scenicService.getScenicVOByTagId(tagId);
+        return Result.success(voList);
+    }
+
+
+
+    @DeleteMapping("/{id}")
+    public Result<String> deleteScenic(@PathVariable Long id) {
+        try {
+            // 可选：先检查景点是否存在
+            Scenic existing = scenicService.getById(id);
+            if (existing == null) {
+                return Result.error("景点不存在");
+            }
+
+            // 执行删除（逻辑删除或物理删除，取决于您的业务）
+            boolean removed = scenicService.removeById(id);
+            if (removed) {
+                log.info("删除景点成功，ID：{}", id);
+                return Result.success("删除成功");
+            } else {
+                return Result.error("删除失败");
+            }
+        } catch (Exception e) {
+            log.error("删除景点异常，ID：{}，异常：", id, e);
+            return Result.error("服务器内部错误");
+        }
+    }
+
+
+
+    @PostMapping
+    public Result<String> addScenic(@Valid @RequestBody ScenicAddDTO dto) {
+        try {
+            log.info("开始新增景点，接收参数：{}", dto);
+            
+            // 直接使用前端传来的分类ID
+            Long categoryId = dto.getCategoryId();
+            // 验证分类是否存在（如果需要）
+            ScenicCategory category = scenicCategoryService.getById(categoryId);
+            if (category == null) {
+                log.error("景点分类不存在，ID：{}", categoryId);
+                return Result.error("景点分类不存在");
+            }
+
+            // DTO转实体
+            Scenic scenic = new Scenic();
+            scenic.setName(dto.getName());
+            scenic.setDescription(dto.getDescription());
+            scenic.setPrice(dto.getPrice());
+            scenic.setLocation(dto.getAddress());
+            scenic.setCategoryId(categoryId);  // 直接设置ID
+            scenic.setViewCount(0);
+            scenic.setStatus(1);
+
+            // 将图片列表序列化为JSON字符串
+            if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+                try {
+                    String imagesJson = objectMapper.writeValueAsString(dto.getImages());
+                    scenic.setImages(imagesJson); // 实体类images为String，正常赋值
+                    log.info("序列化后的图片JSON：{}", imagesJson);
+                } catch (Exception e) {
+                    log.error("图片列表序列化失败：{}", e.getMessage());
+                    return Result.error("图片列表序列化失败");
+                }
+            } else {
+                scenic.setImages("[]"); // 空列表存空JSON数组
+            }
+
+            // 4. 保存到数据库
+            scenicService.save(scenic);
+            log.info("新增景点成功，景点名称：{}，主键 ID：{}", dto.getName(), scenic.getId());
+            return Result.success("新增景点成功");
+
+        } catch (Exception e) {
+            log.error("新增景点异常，参数：{}，异常信息：", dto, e);
+            return Result.error("服务器内部错误，请联系管理员");
+        }
+    }
+
+    @PutMapping("/{id}")
+    public Result<String> updateScenic(@PathVariable Long id, @Valid @RequestBody ScenicAddDTO dto) {
+        try {
+            log.info("开始更新景点，ID：{}，参数：{}", id, dto);
+            
+            // 1. 检查景点是否存在
+            Scenic existing = scenicService.getById(id);
+            if (existing == null) {
+                log.error("景点不存在，ID：{}", id);
+                return Result.error("景点不存在");
+            }
+
+            // 2. 验证分类是否存在
+            Long categoryId = dto.getCategoryId();
+            ScenicCategory category = scenicCategoryService.getById(categoryId);
+            if (category == null) {
+                log.error("景点分类不存在，ID：{}", categoryId);
+                return Result.error("景点分类不存在");
+            }
+
+            // 3. 更新景点信息
+            existing.setName(dto.getName());
+            existing.setDescription(dto.getDescription());
+            existing.setPrice(dto.getPrice());
+            existing.setLocation(dto.getAddress());
+            existing.setCategoryId(categoryId);
+            // 保持原有状态不变，不更新状态字段
+
+            // 4. 处理图片
+            if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+                try {
+                    String imagesJson = objectMapper.writeValueAsString(dto.getImages());
+                    existing.setImages(imagesJson);
+                    log.info("更新景点图片JSON：{}", imagesJson);
+                } catch (Exception e) {
+                    log.error("图片列表序列化失败：{}", e.getMessage());
+                    return Result.error("图片列表序列化失败");
+                }
+            }
+
+            // 5. 保存更新
+            boolean updated = scenicService.updateById(existing);
+            if (updated) {
+                log.info("更新景点成功，ID：{}", id);
+                return Result.success("更新成功");
+            } else {
+                return Result.error("更新失败");
+            }
+        } catch (Exception e) {
+            log.error("更新景点异常，ID：{}，异常：", id, e);
+            return Result.error("服务器内部错误");
+        }
+    }
+}

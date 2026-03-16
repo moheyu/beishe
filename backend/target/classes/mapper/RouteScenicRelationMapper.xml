@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wit.travel.mapper.RouteScenicRelationMapper">
+
+    <delete id="deleteByRouteId">
+        DELETE FROM route_scenic_relation
+        WHERE route_id = #{routeId}
+    </delete>
+
+    <insert id="insertBatch">
+        INSERT INTO route_scenic_relation (route_id, scenic_id, day_number, sort_order, description)
+        VALUES
+        <foreach collection="relations" item="relation" separator=",">
+            (
+                #{relation.routeId},
+                #{relation.scenicId},
+                #{relation.dayNumber},
+                #{relation.sortOrder},
+                #{relation.description}
+            )
+        </foreach>
+    </insert>
+</mapper>
