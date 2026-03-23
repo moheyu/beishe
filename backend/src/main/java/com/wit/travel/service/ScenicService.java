@@ -26,4 +26,10 @@ public interface ScenicService extends IService<Scenic> {
     List<ScenicVO> getScenicVOByCategoryId(Long categoryId);
 
     List<ScenicVO> getRecommendScenicVOList(Integer limit);
+
+    boolean save(Scenic scenic);
+
+    boolean updateById(Scenic scenic);
+
+    boolean removeById(Long id);
 }

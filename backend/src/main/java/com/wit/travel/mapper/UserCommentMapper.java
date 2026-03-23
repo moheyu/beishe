@@ -16,5 +16,7 @@ public interface UserCommentMapper extends BaseMapper<UserComment> {
 
     List<CommentVO> selectCommentVOByScenicId(@Param("scenicId") Long scenicId);
 
+    List<CommentVO> selectCommentVOByRouteId(@Param("routeId") Long routeId);
+
     List<CommentVO> selectCommentVOByUserId(@Param("userId") Long userId);
 }

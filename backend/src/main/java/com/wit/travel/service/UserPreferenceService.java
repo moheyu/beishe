@@ -15,4 +15,10 @@ public interface UserPreferenceService extends IService<UserPreference> {
     List<PreferenceDetailVO> getPreferenceDetailByUserId(Long userId);
 
     List<ScenicVO> getRecommendScenicByUserId(Long userId);
+
+    List<Object> getPreferenceStatistics();
+
+    List<ScenicVO> getRecommendByBrowseHistory(Long userId);
+
+    List<ScenicVO> getHybridRecommend(Long userId);
 }

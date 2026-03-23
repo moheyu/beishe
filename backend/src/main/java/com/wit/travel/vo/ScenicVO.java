@@ -41,5 +41,12 @@ public class ScenicVO {
 
     private Integer status;
 
+    private Integer recommendLevel;
+
     private String createTime;
+
+    /**
+     * 浏览时间（仅浏览历史场景使用）
+     */
+    private String viewTime;
 }

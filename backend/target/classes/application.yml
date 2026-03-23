@@ -2,7 +2,14 @@ server:
   port: 8080
   servlet:   # 整个请求的最大大小
     context-path: /api
-
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  encoding:
+    charset: UTF-8
+    enabled: true
+    force: true
 
 spring:
   web:

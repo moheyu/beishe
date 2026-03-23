@@ -11,8 +11,9 @@ import javax.validation.constraints.NotNull;
 @Data
 public class CommentAddDTO {
 
-    @NotNull(message = "景点ID不能为空")
     private Long scenicId;
+
+    private Long routeId;
 
     @NotBlank(message = "评论内容不能为空")
     private String content;

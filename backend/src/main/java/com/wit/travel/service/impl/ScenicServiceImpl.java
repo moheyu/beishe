@@ -48,4 +48,19 @@ public class ScenicServiceImpl extends ServiceImpl<ScenicMapper, Scenic> impleme
     public List<ScenicVO> getRecommendScenicVOList(Integer limit) {
         return baseMapper.selectRecommendScenicVOList(limit);
     }
+
+    @Override
+    public boolean save(Scenic scenic) {
+        return super.save(scenic);
+    }
+
+    @Override
+    public boolean updateById(Scenic scenic) {
+        return super.updateById(scenic);
+    }
+
+    @Override
+    public boolean removeById(Long id) {
+        return super.removeById(id);
+    }
 }

@@ -27,6 +27,17 @@ public class UserCommentServiceImpl extends ServiceImpl<UserCommentMapper, UserC
     }
 
     @Override
+    public List<CommentVO> getCommentVOByRouteId(Long routeId) {
+        List<CommentVO> voList = baseMapper.selectCommentVOByRouteId(routeId);
+        voList.forEach(vo -> {
+            if (vo.getAvatar() == null) {
+                vo.setAvatar("");
+            }
+        });
+        return voList;
+    }
+
+    @Override
     public List<CommentVO> getCommentVOByUserId(Long userId) {
         List<CommentVO> voList = baseMapper.selectCommentVOByUserId(userId);
         voList.forEach(vo -> {

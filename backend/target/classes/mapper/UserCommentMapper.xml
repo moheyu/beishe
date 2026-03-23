@@ -7,7 +7,6 @@
         <result property="userId" column="user_id"/>
         <result property="scenicId" column="target_id"/>
         <result property="content" column="content"/>
-        <result property="isAudit" column="is_audit"/>
         <result property="createTime" column="create_time"/>
         <result property="username" column="username"/>
         <result property="avatar" column="avatar"/>
@@ -26,8 +25,26 @@
         FROM user_comment uc
         LEFT JOIN user u ON uc.user_id = u.id
         WHERE uc.target_id = #{scenicId}
+          AND uc.type = 1
           AND uc.is_audit = 1
-          AND uc.deleted = 0
+        ORDER BY uc.create_time DESC
+    </select>
+
+    <select id="selectCommentVOByRouteId" resultMap="CommentVOMap">
+        SELECT
+            uc.id,
+            uc.user_id,
+            uc.target_id as scenic_id,
+            uc.content,
+            uc.is_audit,
+            uc.create_time,
+            u.username,
+            u.avatar
+        FROM user_comment uc
+        LEFT JOIN user u ON uc.user_id = u.id
+        WHERE uc.target_id = #{routeId}
+          AND uc.type = 2
+          AND uc.is_audit = 1
         ORDER BY uc.create_time DESC
     </select>
 
@@ -44,7 +61,6 @@
         FROM user_comment uc
         LEFT JOIN user u ON uc.user_id = u.id
         WHERE uc.user_id = #{userId}
-          AND uc.deleted = 0
         ORDER BY uc.create_time DESC
     </select>
 

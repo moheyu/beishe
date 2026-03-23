@@ -30,10 +30,19 @@ public class CommentController {
 
         UserComment comment = new UserComment();
         comment.setUserId(userId);
-        comment.setType(1);
-        comment.setTargetId(addDTO.getScenicId());
         comment.setContent(addDTO.getContent());
         comment.setIsAudit(1);
+
+        if (addDTO.getScenicId() != null) {
+            comment.setType(1);
+            comment.setTargetId(addDTO.getScenicId());
+        } else if (addDTO.getRouteId() != null) {
+            comment.setType(2);
+            comment.setTargetId(addDTO.getRouteId());
+        } else {
+            return Result.error("景点ID或路线ID不能为空");
+        }
+
         commentService.save(comment);
 
         return Result.success("评论成功");
@@ -42,6 +51,22 @@ public class CommentController {
     @GetMapping("/scenic/{scenicId}")
     public Result<List<CommentVO>> getCommentsByScenicId(@PathVariable Long scenicId) {
         List<CommentVO> voList = commentService.getCommentVOByScenicId(scenicId);
+        return Result.success(voList);
+    }
+
+    @GetMapping("/route/{routeId}")
+    public Result<List<CommentVO>> getCommentsByRouteId(@PathVariable Long routeId) {
+        List<CommentVO> voList = commentService.getCommentVOByRouteId(routeId);
+        return Result.success(voList);
+    }
+
+    @GetMapping("/user/list")
+    public Result<List<CommentVO>> getUserCommentList() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return Result.error("请先登录");
+        }
+        List<CommentVO> voList = commentService.getCommentVOByUserId(userId);
         return Result.success(voList);
     }
 }

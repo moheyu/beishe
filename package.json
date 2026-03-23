@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "docx": "^9.6.1",
+    "echarts": "^6.0.0",
+    "element-plus": "^2.13.5",
+    "file-saver": "^2.0.5",
+    "lodash": "^4.17.21",
+    "vue-echarts": "^8.0.1"
+  }
+}

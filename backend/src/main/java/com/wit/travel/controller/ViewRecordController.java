@@ -59,4 +59,15 @@ public class ViewRecordController {
         List<ScenicVO> voList = viewRecordService.getScenicVOByUserId(userId);
         return Result.success(voList);
     }
+
+    @DeleteMapping("/clear")
+    public Result<String> clearViewRecord() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return Result.error("请先登录");
+        }
+
+        viewRecordService.clearByUserId(userId);
+        return Result.success("清空成功");
+    }
 }

@@ -49,8 +49,58 @@
         ))
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
         WHERE up.user_id = #{userId}
-          AND s.deleted = 0
           AND s.status = 1
+        ORDER BY s.view_count DESC, s.score DESC
+    </select>
+
+    <select id="selectPreferenceStatistics" resultType="map">
+        SELECT 
+            COALESCE(sc.name, '未分类') AS category_name,
+            COUNT(*) AS count
+        FROM user_preference up
+        LEFT JOIN scenic_category sc ON up.category_id = sc.id
+        GROUP BY up.category_id, sc.name
+        ORDER BY count DESC
+    </select>
+
+    <select id="selectRecommendByBrowseHistory" resultMap="com.wit.travel.mapper.ScenicMapper.ScenicVOMap">
+        SELECT DISTINCT
+            s.id,
+            s.name,
+            s.description,
+            s.images,
+            s.price,
+            s.score,
+            s.location,
+            s.view_count,
+            s.category_id,
+            sc.name AS category_name,
+            s.status,
+            s.create_time
+        FROM scenic s
+        LEFT JOIN scenic_category sc ON s.category_id = sc.id
+        WHERE s.status = 1
+          AND (
+              s.category_id IN (
+                  SELECT DISTINCT s2.category_id
+                  FROM view_record vr
+                  LEFT JOIN scenic s2 ON vr.scenic_id = s2.id
+                  WHERE vr.user_id = #{userId}
+              )
+              OR EXISTS (
+                  SELECT 1 FROM scenic_tag_relation str2
+                  WHERE str2.scenic_id = s.id
+                    AND str2.tag_id IN (
+                        SELECT DISTINCT str.tag_id
+                        FROM view_record vr
+                        LEFT JOIN scenic_tag_relation str ON vr.scenic_id = str.scenic_id
+                        WHERE vr.user_id = #{userId}
+                    )
+              )
+          )
+          AND s.id NOT IN (
+              SELECT scenic_id FROM view_record WHERE user_id = #{userId}
+          )
         ORDER BY s.view_count DESC, s.score DESC
     </select>
 

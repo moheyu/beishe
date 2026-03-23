@@ -1,5 +1,6 @@
 package com.wit.travel.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wit.travel.entity.ViewRecord;
 import com.wit.travel.mapper.ViewRecordMapper;
@@ -18,5 +19,12 @@ public class ViewRecordServiceImpl extends ServiceImpl<ViewRecordMapper, ViewRec
     @Override
     public List<ScenicVO> getScenicVOByUserId(Long userId) {
         return baseMapper.selectScenicVOByUserId(userId);
+    }
+
+    @Override
+    public void clearByUserId(Long userId) {
+        QueryWrapper<ViewRecord> wrapper = new QueryWrapper<>();
+        wrapper.eq("user_id", userId);
+        baseMapper.delete(wrapper);
     }
 }

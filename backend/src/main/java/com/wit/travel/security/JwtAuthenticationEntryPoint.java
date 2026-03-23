@@ -22,7 +22,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         
-        Result<Void> result = Result.error("未认证，请先登录");
+        // 使用 401 作为 code，而不是默认的 500
+        Result<Void> result = Result.error(401, "未认证，请先登录");
         
         ObjectMapper objectMapper = new ObjectMapper();
         response.getWriter().write(objectMapper.writeValueAsString(result));

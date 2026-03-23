@@ -28,7 +28,7 @@ public class ScenicAddDTO {
     private BigDecimal price;
 
     @NotBlank(message = "景区地址不能为空")
-    private String address;
+    private String location;
 
     private String openingHours;
 

@@ -15,6 +15,7 @@
         <result property="categoryName" column="category_name"/>
         <result property="status" column="status"/>
         <result property="createTime" column="create_time"/>
+        <result property="viewTime" column="view_time"/>
     </resultMap>
 
     <select id="selectScenicVOByUserId" resultMap="ScenicVOMap">
@@ -30,12 +31,12 @@
             s.category_id,
             sc.name AS category_name,
             s.status,
-            s.create_time
+            s.create_time,
+            vr.view_time
         FROM view_record vr
         LEFT JOIN scenic s ON vr.scenic_id = s.id
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
         WHERE vr.user_id = #{userId}
-          AND s.deleted = 0
         ORDER BY vr.view_time DESC
     </select>
 

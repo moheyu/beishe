@@ -2,6 +2,7 @@ package com.wit.travel.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.wit.travel.entity.UserCollection;
+import com.wit.travel.vo.RouteVO;
 import com.wit.travel.vo.ScenicVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -15,6 +16,8 @@ import java.util.List;
 public interface UserCollectionMapper extends BaseMapper<UserCollection> {
 
     List<ScenicVO> selectScenicVOByUserId(@Param("userId") Long userId);
+
+    List<RouteVO> selectRouteVOByUserId(@Param("userId") Long userId);
 
     Integer checkCollectionExists(@Param("userId") Long userId, @Param("scenicId") Long scenicId);
 }

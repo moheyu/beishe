@@ -13,5 +13,7 @@ public interface UserCommentService extends IService<UserComment> {
 
     List<CommentVO> getCommentVOByScenicId(Long scenicId);
 
+    List<CommentVO> getCommentVOByRouteId(Long routeId);
+
     List<CommentVO> getCommentVOByUserId(Long userId);
 }

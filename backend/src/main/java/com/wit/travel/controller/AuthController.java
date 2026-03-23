@@ -3,6 +3,8 @@ package com.wit.travel.controller;
 import com.wit.travel.dto.LoginDTO;
 import com.wit.travel.dto.RegisterDTO;
 import com.wit.travel.entity.User;
+import com.wit.travel.exception.DuplicateException;
+import com.wit.travel.exception.UnauthorizedException;
 import com.wit.travel.service.UserService;
 import com.wit.travel.util.JwtUtil;
 import com.wit.travel.vo.LoginVO;
@@ -60,7 +62,7 @@ public class AuthController {
         // 2. 检查用户名是否已存在
         User existUser = userService.getUserByUsername(registerDTO.getUsername());
         if (existUser != null) {
-            return Result.error("用户名已存在");
+            throw new DuplicateException("用户名已存在");
         }
 
         // 3. 构建用户信息并加密密码
@@ -129,11 +131,11 @@ public class AuthController {
         } catch (BadCredentialsException e) {
             // 仅捕获密码错误异常
             log.error("密码验证失败，用户名：{}", loginDTO.getUsername(), e);
-            return Result.error("用户名或密码错误");
+            throw new UnauthorizedException("用户名或密码错误");
         } catch (UsernameNotFoundException e) {
             // 捕获用户不存在异常
             log.error("用户不存在，用户名：{}", loginDTO.getUsername(), e);
-            return Result.error("用户名或密码错误");
+            throw new UnauthorizedException("用户名或密码错误");
         } catch (Exception e) {
             // 其他异常（数据库、JWT等）统一处理
             log.error("登录异常，用户名：{}", loginDTO.getUsername(), e);

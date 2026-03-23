@@ -18,4 +18,8 @@ public interface UserPreferenceMapper extends BaseMapper<UserPreference> {
     List<PreferenceDetailVO> selectPreferenceDetailByUserId(@Param("userId") Long userId);
 
     List<ScenicVO> selectScenicVOByUserId(@Param("userId") Long userId);
+
+    List<Object> selectPreferenceStatistics();
+
+    List<ScenicVO> selectRecommendByBrowseHistory(@Param("userId") Long userId);
 }

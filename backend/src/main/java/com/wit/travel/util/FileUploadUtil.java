@@ -103,4 +103,53 @@ public class FileUploadUtil {
         }
         return "";
     }
+
+    /**
+     * 根据URL删除文件
+     * @param imageUrl 图片URL，格式如 /uploads/scenic/20250318/xxx.jpg
+     */
+    public void deleteFile(String imageUrl) {
+        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+            return;
+        }
+
+        try {
+            // URL格式：/uploads/scenic/20250318/xxx.jpg
+            // 需要提取相对路径部分：scenic/20250318/xxx.jpg
+            if (imageUrl.startsWith("/uploads/")) {
+                String relativePath = imageUrl.substring("/uploads/".length());
+                // 替换URL中的斜杠为系统分隔符
+                relativePath = relativePath.replace("/", File.separator);
+                String absolutePath = uploadPath + File.separator + relativePath;
+
+                File file = new File(absolutePath);
+                if (file.exists()) {
+                    boolean deleted = file.delete();
+                    if (deleted) {
+                        System.out.println("删除文件成功：" + absolutePath);
+                    } else {
+                        System.err.println("删除文件失败：" + absolutePath);
+                    }
+                } else {
+                    System.out.println("文件不存在，跳过删除：" + absolutePath);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("删除文件异常，URL：" + imageUrl + "，异常：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 批量删除文件
+     * @param imageUrls 图片URL列表
+     */
+    public void deleteFiles(String[] imageUrls) {
+        if (imageUrls == null || imageUrls.length == 0) {
+            return;
+        }
+
+        for (String imageUrl : imageUrls) {
+            deleteFile(imageUrl);
+        }
+    }
 }

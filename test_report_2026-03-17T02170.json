@@ -1,0 +1,353 @@
+{
+  "testTime": "2026-03-17T02:16:47.288Z",
+  "testDuration": 19,
+  "summary": {
+    "total": 34,
+    "passed": 34,
+    "failed": 0,
+    "passRate": "100.00%"
+  },
+  "results": [
+    {
+      "testName": "用户注册",
+      "endpoint": "/auth/register",
+      "method": "POST",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:47.804Z"
+    },
+    {
+      "testName": "用户登录",
+      "endpoint": "/auth/login",
+      "method": "POST",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:49.485Z"
+    },
+    {
+      "testName": "管理员登录",
+      "endpoint": "/auth/login",
+      "method": "POST",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:50.578Z"
+    },
+    {
+      "testName": "重复注册检测",
+      "endpoint": "/auth/register",
+      "method": "POST",
+      "status": "PASS",
+      "expected": 409,
+      "actual": "409",
+      "error": null,
+      "timestamp": "2026-03-17T02:16:51.605Z"
+    },
+    {
+      "testName": "获取用户信息",
+      "endpoint": "/user/info",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:51.634Z"
+    },
+    {
+      "testName": "更新用户信息",
+      "endpoint": "/user/update",
+      "method": "PUT",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:52.163Z"
+    },
+    {
+      "testName": "管理员获取用户列表",
+      "endpoint": "/user/list",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:52.705Z"
+    },
+    {
+      "testName": "添加景点",
+      "endpoint": "/admin/scenic",
+      "method": "POST",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:52.737Z"
+    },
+    {
+      "testName": "获取景点列表",
+      "endpoint": "/admin/scenic/list",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:53.783Z"
+    },
+    {
+      "testName": "获取景点详情",
+      "endpoint": "/admin/scenic/4",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:54.305Z"
+    },
+    {
+      "testName": "更新景点",
+      "endpoint": "/admin/scenic/4",
+      "method": "PUT",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:54.836Z"
+    },
+    {
+      "testName": "景点审核",
+      "endpoint": "/admin/scenic/4/audit",
+      "method": "PUT",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:55.361Z"
+    },
+    {
+      "testName": "获取推荐景点",
+      "endpoint": "/admin/scenic/recommend",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:55.890Z"
+    },
+    {
+      "testName": "添加路线",
+      "endpoint": "/admin/route",
+      "method": "POST",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:55.916Z"
+    },
+    {
+      "testName": "获取路线列表",
+      "endpoint": "/admin/route/list",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:56.959Z"
+    },
+    {
+      "testName": "获取路线详情",
+      "endpoint": "/admin/route/detail/2",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:57.489Z"
+    },
+    {
+      "testName": "更新路线",
+      "endpoint": "/admin/route/2",
+      "method": "PUT",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:58.029Z"
+    },
+    {
+      "testName": "路线审核",
+      "endpoint": "/admin/route/2/audit",
+      "method": "PUT",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:58.545Z"
+    },
+    {
+      "testName": "获取推荐路线",
+      "endpoint": "/admin/route/recommend",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:59.072Z"
+    },
+    {
+      "testName": "添加景点评论",
+      "endpoint": "/comment",
+      "method": "POST",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:16:59.088Z"
+    },
+    {
+      "testName": "获取景点评论",
+      "endpoint": "/comment/scenic/4",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:17:00.095Z"
+    },
+    {
+      "testName": "添加路线评论",
+      "endpoint": "/comment",
+      "method": "POST",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:17:00.618Z"
+    },
+    {
+      "testName": "获取路线评论",
+      "endpoint": "/comment/route/2",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:17:01.635Z"
+    },
+    {
+      "testName": "收藏景点",
+      "endpoint": "/collection/scenic/4",
+      "method": "POST",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:17:01.652Z"
+    },
+    {
+      "testName": "获取收藏列表",
+      "endpoint": "/collection/list",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:17:02.671Z"
+    },
+    {
+      "testName": "取消收藏景点",
+      "endpoint": "/collection/scenic/4",
+      "method": "DELETE",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:17:03.197Z"
+    },
+    {
+      "testName": "收藏路线",
+      "endpoint": "/collection/route/2",
+      "method": "POST",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:17:03.724Z"
+    },
+    {
+      "testName": "取消收藏路线",
+      "endpoint": "/collection/route/2",
+      "method": "DELETE",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:17:04.242Z"
+    },
+    {
+      "testName": "获取景点统计",
+      "endpoint": "/admin/statistics/scenic/top",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:17:04.255Z"
+    },
+    {
+      "testName": "获取路线统计",
+      "endpoint": "/admin/statistics/route/top",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:17:04.783Z"
+    },
+    {
+      "testName": "获取整体统计",
+      "endpoint": "/admin/statistics/overall",
+      "method": "GET",
+      "status": "PASS",
+      "expected": 200,
+      "actual": 200,
+      "error": null,
+      "timestamp": "2026-03-17T02:17:05.342Z"
+    },
+    {
+      "testName": "未登录访问保护接口",
+      "endpoint": "/user/info",
+      "method": "GET",
+      "status": "PASS",
+      "expected": "401或错误",
+      "actual": 401,
+      "error": null,
+      "timestamp": "2026-03-17T02:17:05.349Z"
+    },
+    {
+      "testName": "错误密码登录",
+      "endpoint": "/auth/login",
+      "method": "POST",
+      "status": "PASS",
+      "expected": 401,
+      "actual": "401",
+      "error": null,
+      "timestamp": "2026-03-17T02:17:06.039Z"
+    },
+    {
+      "testName": "访问不存在的景点",
+      "endpoint": "/admin/scenic/999999",
+      "method": "GET",
+      "status": "PASS",
+      "expected": "错误",
+      "actual": 500,
+      "error": null,
+      "timestamp": "2026-03-17T02:17:06.555Z"
+    }
+  ],
+  "failedTests": []
+}

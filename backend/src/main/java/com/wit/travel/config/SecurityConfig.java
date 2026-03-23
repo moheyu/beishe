@@ -16,6 +16,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 /**
  * Spring Security安全配置类
@@ -26,7 +31,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private UserDetailsServiceImpl userDetailsService; // 现在注入的是CustomUserDetailsService
+    private UserDetailsServiceImpl userDetailsService;
 
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -37,6 +42,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
@@ -54,17 +72,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
+                .cors()  // 启用 CORS
+                .and()
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
+                // 公开接口（游客可访问）
                 .antMatchers("/auth/register", "/auth/login").permitAll()
-                .antMatchers("/scenic/list", "/scenic/**").permitAll()
-                .antMatchers("/comment/scenic/**").permitAll()
-                .antMatchers("/uploads/**").permitAll()
-                .antMatchers("/user/info").permitAll()
-                .antMatchers("/route/list", "/route/**").permitAll()
+                .antMatchers("/scenic/list", "/scenic/**", "/scenic/recommend").permitAll()
+                .antMatchers("/route/list", "/route/**", "/route/recommend").permitAll()
+                .antMatchers("/uploads/**", "/upload/**").permitAll()
+                .antMatchers("/announcement/**", "/forum/**").permitAll()
+                .antMatchers("/tag/**").permitAll()
+                // 需要登录的接口
+                .antMatchers("/comment/**").authenticated()
+                .antMatchers("/collection/**").authenticated()
+                .antMatchers("/user/**").authenticated()
+                .antMatchers("/preference/**").authenticated()
+                .antMatchers("/view-record/**").authenticated()
+                // 管理端接口需要登录
+                .antMatchers("/admin/**").authenticated()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

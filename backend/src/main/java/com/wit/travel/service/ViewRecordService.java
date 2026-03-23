@@ -12,4 +12,6 @@ import java.util.List;
 public interface ViewRecordService extends IService<ViewRecord> {
 
     List<ScenicVO> getScenicVOByUserId(Long userId);
+
+    void clearByUserId(Long userId);
 }

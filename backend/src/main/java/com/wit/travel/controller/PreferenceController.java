@@ -98,4 +98,57 @@ public class PreferenceController {
         List<ScenicVO> voList = preferenceService.getRecommendScenicByUserId(userId);
         return Result.success(voList);
     }
+
+    @GetMapping("/recommend/hybrid")
+    public Result<List<ScenicVO>> getHybridRecommend() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return Result.error("请先登录");
+        }
+
+        List<ScenicVO> voList = preferenceService.getHybridRecommend(userId);
+        return Result.success(voList);
+    }
+
+    @GetMapping("/user/{userId}")
+    public Result<List<PreferenceDetailVO>> getUserPreferences(@PathVariable Long userId) {
+        if (userId == null) {
+            return Result.error("用户ID不能为空");
+        }
+        
+        List<PreferenceDetailVO> preferences = preferenceService.getPreferenceDetailByUserId(userId);
+        return Result.success(preferences);
+    }
+
+    @GetMapping("/statistics")
+    public Result<List<Object>> getPreferenceStatistics() {
+        List<Object> statistics = preferenceService.getPreferenceStatistics();
+        return Result.success(statistics);
+    }
+
+    @PutMapping
+    public Result<String> updateUserPreference(@RequestBody PreferenceAddDTO dto) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return Result.error("请先登录");
+        }
+
+        // 先删除用户所有偏好，再添加新的
+        QueryWrapper<UserPreference> deleteWrapper = new QueryWrapper<>();
+        deleteWrapper.eq("user_id", userId);
+        preferenceMapper.delete(deleteWrapper);
+
+        // 添加新的偏好
+        if (dto.getCategoryId() != null) {
+            UserPreference preference = new UserPreference();
+            preference.setUserId(userId);
+            preference.setCategoryId(dto.getCategoryId());
+            if (dto.getTagId() != null) {
+                preference.setTagId(dto.getTagId());
+            }
+            preferenceService.save(preference);
+        }
+
+        return Result.success("保存成功");
+    }
 }
