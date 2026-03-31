@@ -7,28 +7,26 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 用户收藏实体
+ * 路线分类实体
  */
 @Data
-@TableName("user_collection")
-public class UserCollection implements Serializable {
+@TableName("route_category")
+public class RouteCategory implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    private Long userId;
+    /** 分类名称 */
+    private String name;
 
-    /** 收藏类型：1-景点，2-路线 */
-    private Integer type;
-
-    /** 目标 ID（景点 ID 或路线 ID） */
-    private Long targetId;
-
-    /** 备注（管理端可填） */
-    private String remark;
+    /** 排序权重，值越小越靠前 */
+    private Integer sort;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
 }

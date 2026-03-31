@@ -27,9 +27,10 @@ public interface ScenicService extends IService<Scenic> {
 
     List<ScenicVO> getRecommendScenicVOList(Integer limit);
 
-    boolean save(Scenic scenic);
-
-    boolean updateById(Scenic scenic);
-
-    boolean removeById(Long id);
+    /**
+     * 原子递增景点浏览量。
+     *
+     * @param scenicId 景点 ID
+     */
+    void incrementViewCount(Long scenicId);
 }

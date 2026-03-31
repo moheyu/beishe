@@ -22,6 +22,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/user")
 public class UserController {
 
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @Autowired
     private UserService userService;
 
@@ -32,16 +35,7 @@ public class UserController {
         if (user == null) {
             return Result.error("用户不存在");
         }
-
-        UserVO userVO = new UserVO();
-        BeanUtils.copyProperties(user, userVO);
-        if (user.getCreateTime() != null) {
-            userVO.setCreateTime(user.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        }
-        if (userVO.getAvatar() == null) {
-            userVO.setAvatar("");
-        }
-        return Result.success(userVO);
+        return Result.success(toUserVO(user));
     }
 
     @PutMapping("/update")
@@ -51,7 +45,6 @@ public class UserController {
         if (user == null) {
             return Result.error("用户不存在");
         }
-
         if (userUpdateDTO.getNickname() != null) {
             user.setNickname(userUpdateDTO.getNickname());
         }
@@ -59,26 +52,16 @@ public class UserController {
             user.setAvatar(userUpdateDTO.getAvatar());
         }
         userService.updateById(user);
-
         return Result.success("更新成功");
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ROOT')")
     @GetMapping("/list")
     public Result<List<UserVO>> listUsers() {
-        List<User> userList = userService.listAllUsers();
-        List<UserVO> userVOList = userList.stream().map(user -> {
-            UserVO userVO = new UserVO();
-            BeanUtils.copyProperties(user, userVO);
-            if (user.getCreateTime() != null) {
-                userVO.setCreateTime(user.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-            }
-            if (userVO.getAvatar() == null) {
-                userVO.setAvatar("");
-            }
-            return userVO;
-        }).collect(Collectors.toList());
-        return Result.success(userVOList);
+        List<UserVO> voList = userService.listAllUsers().stream()
+                .map(this::toUserVO)
+                .collect(Collectors.toList());
+        return Result.success(voList);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ROOT')")
@@ -88,22 +71,13 @@ public class UserController {
         if (user == null) {
             return Result.error("用户不存在");
         }
-        UserVO userVO = new UserVO();
-        BeanUtils.copyProperties(user, userVO);
-        if (user.getCreateTime() != null) {
-            userVO.setCreateTime(user.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        }
-        if (userVO.getAvatar() == null) {
-            userVO.setAvatar("");
-        }
-        return Result.success(userVO);
+        return Result.success(toUserVO(user));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ROOT')")
     @PutMapping("/{id}")
     public Result<String> updateUserById(@PathVariable Long id, @RequestBody User user) {
-        User existingUser = userService.getById(id);
-        if (existingUser == null) {
+        if (userService.getById(id) == null) {
             return Result.error("用户不存在");
         }
         user.setId(id);
@@ -114,11 +88,25 @@ public class UserController {
     @PreAuthorize("hasRole('ROOT')")
     @DeleteMapping("/{id}")
     public Result<String> deleteUser(@PathVariable Long id) {
-        User user = userService.getById(id);
-        if (user == null) {
+        if (userService.getById(id) == null) {
             return Result.error("用户不存在");
         }
         userService.removeById(id);
         return Result.success("删除成功");
+    }
+
+    /**
+     * 将 User 实体转换为 UserVO，统一处理时间格式和空头像。
+     */
+    private UserVO toUserVO(User user) {
+        UserVO vo = new UserVO();
+        BeanUtils.copyProperties(user, vo);
+        if (user.getCreateTime() != null) {
+            vo.setCreateTime(user.getCreateTime().format(DATE_FORMATTER));
+        }
+        if (vo.getAvatar() == null) {
+            vo.setAvatar("");
+        }
+        return vo;
     }
 }

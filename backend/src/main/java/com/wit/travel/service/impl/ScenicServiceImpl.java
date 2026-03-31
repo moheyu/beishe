@@ -50,17 +50,7 @@ public class ScenicServiceImpl extends ServiceImpl<ScenicMapper, Scenic> impleme
     }
 
     @Override
-    public boolean save(Scenic scenic) {
-        return super.save(scenic);
-    }
-
-    @Override
-    public boolean updateById(Scenic scenic) {
-        return super.updateById(scenic);
-    }
-
-    @Override
-    public boolean removeById(Long id) {
-        return super.removeById(id);
+    public void incrementViewCount(Long scenicId) {
+        baseMapper.incrementViewCount(scenicId);
     }
 }

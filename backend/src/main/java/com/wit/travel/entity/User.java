@@ -63,10 +63,4 @@ public class User implements Serializable {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
     
-    /**
-     * 手动实现getPassword()方法，确保lombok的@Data注解生效
-     */
-    public String getPassword() {
-        return password;
-    }
 }

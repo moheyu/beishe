@@ -1,22 +1,12 @@
 package com.wit.travel.config;
 
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachingConfigurer;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * 缓存配置类
- * 用于配置Spring Cache，减少数据库查询次数
+ * 缓存配置。
+ * <p>项目使用 Redis（{@code RedisTemplate}）作为唯一缓存层，
+ * 不再注册 {@code ConcurrentMapCacheManager}，避免两套缓存并存导致数据不一致。
  */
 @Configuration
-public class CacheConfig implements CachingConfigurer {
-
-    @Bean
-    @Override
-    public CacheManager cacheManager() {
-        ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
-        return cacheManager;
-    }
+public class CacheConfig {
 }

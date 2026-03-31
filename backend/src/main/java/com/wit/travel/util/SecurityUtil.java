@@ -1,104 +1,85 @@
 package com.wit.travel.util;
 
 import com.wit.travel.entity.User;
-import com.wit.travel.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
- * 安全工具类
- * 用于获取当前登录用户信息
+ * 安全工具类，用于从 SecurityContext 中获取当前登录用户信息。
+ *
+ * <p>userId 从 JWT 过滤器写入 Authentication details 的 Long 值中读取，
+ * 无需额外数据库查询。
  */
 @Slf4j
 @Component
 public class SecurityUtil {
 
-    private static UserService userService;
-
-    @Autowired
-    public void setUserService(UserService userService) {
-        SecurityUtil.userService = userService;
+    private SecurityUtil() {
     }
 
     /**
-     * 获取当前登录用户 ID
+     * 获取当前登录用户 ID。
+     * <p>JWT 过滤器在验证 Token 后将 userId 写入 Authentication details，
+     * 此处直接读取，避免每次请求查库。
+     *
+     * @return 用户 ID，未登录时返回 null
      */
     public static Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("SecurityUtil.getCurrentUserId() 被调用");
-        log.info("Authentication: {}", authentication);
-            
-        if (authentication != null) {
-            Object principal = authentication.getPrincipal();
-            log.info("Principal 类型: {}", principal.getClass().getName());
-            log.info("Principal 内容: {}", principal);
-                
-            // 情况 1：principal 是 Long 类型（旧逻辑）
-            if (principal instanceof Long) {
-                return (Long) principal;
-            }
-                
-            // 情况 2：principal 是 User 实体对象
-            if (principal instanceof User) {
-                return ((User) principal).getId();
-            }
-                
-            // 情况 3：principal 是 UserDetails 对象（JWT 过滤器设置的）
-            if (principal instanceof org.springframework.security.core.userdetails.User) {
-                String username = ((org.springframework.security.core.userdetails.User) principal).getUsername();
-                log.info("从 UserDetails 获取用户名: {}", username);
-                // 通过用户名查询用户 ID
-                if (userService != null) {
-                    User user = userService.getUserByUsername(username);
-                    if (user != null) {
-                        log.info("查询到用户 ID: {}", user.getId());
-                        return user.getId();
-                    }
-                }
-            }
-        } else {
-            log.warn("SecurityContext 中的 Authentication 为 null！");
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
         }
-        log.warn("无法获取当前用户 ID，返回 null");
+
+        // JWT 过滤器将 userId 写入 details
+        Object details = authentication.getDetails();
+        if (details instanceof Long) {
+            return (Long) details;
+        }
+
+        // 兼容：principal 直接是 User 实体（非 JWT 场景）
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof User) {
+            return ((User) principal).getId();
+        }
+
+        log.warn("无法从 SecurityContext 中提取 userId，principal 类型：{}",
+                principal == null ? "null" : principal.getClass().getName());
         return null;
     }
 
     /**
-     * 获取当前登录用户名
+     * 获取当前登录用户名。
+     *
+     * @return 用户名，未登录时返回 null
      */
     public static String getCurrentUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            return authentication.getName();
+        if (authentication == null) {
+            return null;
         }
-        return null;
+        return authentication.getName();
     }
 
     /**
-     * 获取当前登录用户角色
-     * 返回1表示管理员，0表示普通用户
+     * 获取当前登录用户角色值。
+     *
+     * @return 1-管理员或 ROOT，0-普通用户，null-未登录
      */
     public static Integer getCurrentUserRole() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            List<GrantedAuthority> authorities = (List<GrantedAuthority>) authentication.getAuthorities();
-            if (authorities != null && !authorities.isEmpty()) {
-                String role = authorities.get(0).getAuthority();
-                if ("ROLE_ADMIN".equals(role)) {
-                    return 1;
-                }
-            }
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof Long) {
-                return 0;
-            }
+        if (authentication == null) {
+            return null;
         }
-        return null;
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        if (authorities == null || authorities.isEmpty()) {
+            return 0;
+        }
+        String role = authorities.iterator().next().getAuthority();
+        return ("ROLE_ROOT".equals(role) || "ROLE_ADMIN".equals(role)) ? 1 : 0;
     }
 }

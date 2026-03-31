@@ -86,25 +86,25 @@
         WHERE s.id = #{id}
     </select>
 
-    <!-- 修复后的代码：所有参数前加上 query. -->
     <select id="selectScenicVOList" resultMap="ScenicVOMap">
         SELECT
-        s.id,
-        s.name,
-        s.description,
-        s.images,
-        s.price,
-        s.score,
-        s.location,
-        s.view_count,
-        s.category_id,
-        sc.name AS category_name,
-        s.status,
-        s.recommend_level,
-        s.create_time
+            s.id,
+            s.name,
+            s.description,
+            s.images,
+            s.price,
+            s.score,
+            s.location,
+            s.view_count,
+            s.category_id,
+            sc.name AS category_name,
+            s.status,
+            s.recommend_level,
+            s.create_time
         FROM scenic s
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
         <where>
+            s.deleted = 0
             <if test="query.name != null and query.name != ''">
                 AND s.name LIKE CONCAT('%', #{query.name}, '%')
             </if>
@@ -113,7 +113,7 @@
             </if>
             <if test="query.tagId != null">
                 AND s.id IN (
-                SELECT scenic_id FROM scenic_tag_relation WHERE tag_id = #{query.tagId}
+                    SELECT scenic_id FROM scenic_tag_relation WHERE tag_id = #{query.tagId}
                 )
             </if>
             <if test="query.location != null and query.location != ''">
@@ -145,6 +145,7 @@
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
         INNER JOIN scenic_tag_relation str ON s.id = str.scenic_id
         WHERE str.tag_id = #{tagId}
+          AND s.deleted = 0
         ORDER BY s.view_count DESC
     </select>
 
@@ -166,6 +167,7 @@
         FROM scenic s
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
         WHERE s.category_id = #{categoryId}
+          AND s.deleted = 0
         ORDER BY s.view_count DESC
     </select>
 
@@ -192,6 +194,11 @@
         ORDER BY s.view_count DESC, s.score DESC
         LIMIT #{limit}
     </select>
+
+    <!-- 原子递增浏览量，避免并发 read-modify-write 丢失计数 -->
+    <update id="incrementViewCount">
+        UPDATE scenic SET view_count = view_count + 1 WHERE id = #{scenicId}
+    </update>
 
     <select id="selectHotScenicList" resultMap="ScenicVOMap">
         SELECT

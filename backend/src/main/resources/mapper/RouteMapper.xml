@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wit.travel.mapper.RouteMapper">
+
+    <resultMap id="RouteVOMap" type="com.wit.travel.vo.RouteVO">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="images" column="images" typeHandler="com.wit.travel.handler.StringToListTypeHandler"/>
+        <result property="durationDays" column="duration_days"/>
+        <result property="budget" column="budget"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="RouteDetailVOMap" type="com.wit.travel.vo.RouteDetailVO" extends="RouteVOMap">
+        <collection property="comments" ofType="com.wit.travel.vo.CommentVO">
+            <id property="id" column="comment_id"/>
+            <result property="userId" column="comment_user_id"/>
+            <result property="content" column="comment_content"/>
+            <result property="createTime" column="comment_create_time"/>
+            <result property="username" column="comment_username"/>
+            <result property="avatar" column="comment_avatar"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectRouteVOById" resultMap="RouteVOMap">
+        SELECT
+            r.id,
+            r.name,
+            r.description,
+            r.images,
+            r.duration_days,
+            r.budget,
+            r.category_id,
+            rc.name AS category_name,
+            r.status,
+            r.create_time
+        FROM travel_route r
+        LEFT JOIN route_category rc ON r.category_id = rc.id
+        WHERE r.id = #{id}
+          AND r.deleted = 0
+    </select>
+
+    <select id="selectRouteDetailVOById" resultMap="RouteDetailVOMap">
+        SELECT
+            r.id,
+            r.name,
+            r.description,
+            r.images,
+            r.duration_days,
+            r.budget,
+            r.category_id,
+            rc.name AS category_name,
+            r.status,
+            r.create_time,
+            uc.id          AS comment_id,
+            uc.user_id     AS comment_user_id,
+            uc.content     AS comment_content,
+            uc.create_time AS comment_create_time,
+            u.username     AS comment_username,
+            u.avatar       AS comment_avatar
+        FROM travel_route r
+        LEFT JOIN route_category rc ON r.category_id = rc.id
+        LEFT JOIN user_comment uc ON r.id = uc.target_id AND uc.type = 2 AND uc.is_audit = 1
+        LEFT JOIN user u ON uc.user_id = u.id
+        WHERE r.id = #{id}
+          AND r.deleted = 0
+    </select>
+
+    <select id="selectRouteVOList" resultMap="RouteVOMap">
+        SELECT
+            r.id,
+            r.name,
+            r.description,
+            r.images,
+            r.duration_days,
+            r.budget,
+            r.category_id,
+            rc.name AS category_name,
+            r.status,
+            r.create_time
+        FROM travel_route r
+        LEFT JOIN route_category rc ON r.category_id = rc.id
+        <where>
+            r.deleted = 0
+            <if test="query.name != null and query.name != ''">
+                AND r.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.categoryId != null">
+                AND r.category_id = #{query.categoryId}
+            </if>
+            <if test="query.status != null">
+                AND r.status = #{query.status}
+            </if>
+        </where>
+        ORDER BY r.create_time DESC
+    </select>
+
+    <select id="selectRecommendRouteVOList" resultMap="RouteVOMap">
+        SELECT
+            r.id,
+            r.name,
+            r.description,
+            r.images,
+            r.duration_days,
+            r.budget,
+            r.category_id,
+            rc.name AS category_name,
+            r.status,
+            r.create_time
+        FROM travel_route r
+        LEFT JOIN route_category rc ON r.category_id = rc.id
+        WHERE r.status = 1
+          AND r.deleted = 0
+        ORDER BY r.create_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectRouteVOByCategoryId" resultMap="RouteVOMap">
+        SELECT
+            r.id,
+            r.name,
+            r.description,
+            r.images,
+            r.duration_days,
+            r.budget,
+            r.category_id,
+            rc.name AS category_name,
+            r.status,
+            r.create_time
+        FROM travel_route r
+        LEFT JOIN route_category rc ON r.category_id = rc.id
+        WHERE r.category_id = #{categoryId}
+          AND r.deleted = 0
+        ORDER BY r.create_time DESC
+    </select>
+
+</mapper>

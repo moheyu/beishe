@@ -1,21 +1,21 @@
 package com.wit.travel.controller;
 
-import com.wit.travel.entity.Scenic;
 import com.wit.travel.entity.ViewRecord;
 import com.wit.travel.service.ScenicService;
 import com.wit.travel.service.ViewRecordService;
 import com.wit.travel.util.SecurityUtil;
 import com.wit.travel.vo.Result;
 import com.wit.travel.vo.ScenicVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
  * 浏览记录控制器
  */
+@Slf4j
 @RestController
 @RequestMapping("/view-record")
 public class ViewRecordController {
@@ -26,15 +26,16 @@ public class ViewRecordController {
     @Autowired
     private ScenicService scenicService;
 
+    /**
+     * 记录用户浏览景点，并原子递增景点浏览量。
+     */
     @PostMapping("/{scenicId}")
     public Result<String> addViewRecord(@PathVariable Long scenicId) {
         Long userId = SecurityUtil.getCurrentUserId();
         if (userId == null) {
             return Result.error("请先登录");
         }
-
-        Scenic scenic = scenicService.getById(scenicId);
-        if (scenic == null) {
+        if (scenicService.getById(scenicId) == null) {
             return Result.error("景点不存在");
         }
 
@@ -43,8 +44,8 @@ public class ViewRecordController {
         record.setScenicId(scenicId);
         viewRecordService.save(record);
 
-        scenic.setViewCount(scenic.getViewCount() + 1);
-        scenicService.updateById(scenic);
+        // 使用 SQL 原子递增，避免并发场景下的计数丢失
+        scenicService.incrementViewCount(scenicId);
 
         return Result.success("记录成功");
     }
@@ -55,9 +56,7 @@ public class ViewRecordController {
         if (userId == null) {
             return Result.error("请先登录");
         }
-
-        List<ScenicVO> voList = viewRecordService.getScenicVOByUserId(userId);
-        return Result.success(voList);
+        return Result.success(viewRecordService.getScenicVOByUserId(userId));
     }
 
     @DeleteMapping("/clear")
@@ -66,7 +65,6 @@ public class ViewRecordController {
         if (userId == null) {
             return Result.error("请先登录");
         }
-
         viewRecordService.clearByUserId(userId);
         return Result.success("清空成功");
     }

@@ -32,77 +32,63 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String requestURI = request.getRequestURI();
-        
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
         // OPTIONS 预检请求直接放行
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
-        
-        log.info("JWT 过滤器拦截请求：{}", requestURI);
-        
-        // 排除登录、注册和公开接口请求
-        // 注意：/admin/ 路径需要认证，不能放在这里
-        if (requestURI != null && (
-                requestURI.contains("/auth/login") ||
-                requestURI.contains("/auth/register") ||
-                // 公开接口
-                (requestURI.startsWith("/scenic/") && !requestURI.startsWith("/admin/scenic")) ||
-                (requestURI.startsWith("/route/") && !requestURI.startsWith("/admin/route")) ||
-                // 评论接口需要认证，不能放行
-                requestURI.contains("/uploads/") ||
-                requestURI.contains("/announcement/") ||
-                // 论坛接口：只放行 GET 请求的查询接口
-                (requestURI.startsWith("/forum/") && 
-                    ("GET".equalsIgnoreCase(request.getMethod()) || 
-                     requestURI.contains("/replies"))) ||
-                requestURI.contains("/tag/"))) {
-            log.info("放行公开接口：{}", requestURI);
+
+        String requestURI = request.getRequestURI();
+
+        // 公开接口无需 Token 验证，直接放行
+        if (isPublicUri(requestURI, request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
-        
-        String authHeader = request.getHeader("Authorization");
-        log.info("请求头 Authorization: {}", authHeader != null ? "存在" : "不存在");
 
+        String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            log.info("Token 前 20 位：{}", token.substring(0, Math.min(20, token.length())) + "...");
-            String username = jwtUtil.extractUsername(token);
-            log.info("从 Token 中提取的用户名：{}", username);
-        
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                try {
+            try {
+                String username = jwtUtil.extractUsername(token);
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                    log.info("加载 UserDetails 成功：{}", userDetails.getUsername());
-        
-                    boolean isValid = jwtUtil.validateToken(token, userDetails.getUsername());
-                    log.info("Token 验证结果：{}", isValid);
-        
-                    if (isValid) {
+                    if (jwtUtil.validateToken(token, userDetails.getUsername())) {
                         Long userId = jwtUtil.extractUserId(token);
-                        log.info("提取用户 ID: {}, 设置认证到 SecurityContext", userId);
-                        // 第一个参数必须是 UserDetails 对象，确保 authorities 正确传递
-                        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-                        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+                        // userId 写入 details，供 SecurityUtil.getCurrentUserId() 无查库读取
+                        authToken.setDetails(userId);
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
                     } else {
                         log.warn("Token 验证失败，用户名：{}", username);
                     }
-                } catch (Exception e) {
-                    // JWT 验证失败，清除认证信息
-                    log.warn("JWT 验证失败：{}, token: {}", e.getMessage(), token.substring(0, Math.min(20, token.length())) + "...");
-                    SecurityContextHolder.clearContext();
                 }
+            } catch (Exception e) {
+                log.warn("JWT 解析失败：{}", e.getMessage());
+                SecurityContextHolder.clearContext();
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    /**
+     * 判断是否为无需认证的公开接口。
+     */
+    private boolean isPublicUri(String uri, String method) {
+        if (uri == null) {
+            return false;
+        }
+        return uri.contains("/auth/login")
+                || uri.contains("/auth/register")
+                || (uri.startsWith("/scenic/") && !uri.startsWith("/admin/scenic"))
+                || (uri.startsWith("/route/") && !uri.startsWith("/admin/route"))
+                || uri.contains("/uploads/")
+                || uri.contains("/announcement/")
+                || uri.contains("/tag/")
+                || (uri.startsWith("/forum/") && "GET".equalsIgnoreCase(method));
     }
 }

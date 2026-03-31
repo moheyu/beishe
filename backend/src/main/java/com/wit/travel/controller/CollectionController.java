@@ -1,10 +1,7 @@
 package com.wit.travel.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.wit.travel.entity.Scenic;
-import com.wit.travel.entity.TravelRoute;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.wit.travel.entity.UserCollection;
-import com.wit.travel.mapper.UserCollectionMapper;
 import com.wit.travel.service.RouteService;
 import com.wit.travel.service.ScenicService;
 import com.wit.travel.service.UserCollectionService;
@@ -12,10 +9,11 @@ import com.wit.travel.util.SecurityUtil;
 import com.wit.travel.vo.Result;
 import com.wit.travel.vo.RouteVO;
 import com.wit.travel.vo.ScenicVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,15 +21,18 @@ import java.util.Map;
 /**
  * 收藏控制器
  */
+@Slf4j
 @RestController
 @RequestMapping("/collection")
 public class CollectionController {
 
-    @Autowired
-    private UserCollectionService collectionService;
+    /** 收藏类型：景点 */
+    private static final int TYPE_SCENIC = 1;
+    /** 收藏类型：路线 */
+    private static final int TYPE_ROUTE = 2;
 
     @Autowired
-    private UserCollectionMapper collectionMapper;
+    private UserCollectionService collectionService;
 
     @Autowired
     private ScenicService scenicService;
@@ -45,18 +46,13 @@ public class CollectionController {
         if (userId == null) {
             return Result.error("请先登录");
         }
-
-        Scenic scenic = scenicService.getById(scenicId);
-        if (scenic == null) {
+        if (scenicService.getById(scenicId) == null) {
             return Result.error("景点不存在");
         }
-
-        UserCollection collection = new UserCollection();
-        collection.setUserId(userId);
-        collection.setType(1);
-        collection.setTargetId(scenicId);
-        collectionService.save(collection);
-
+        if (collectionService.checkCollectionExists(userId, scenicId)) {
+            return Result.error("已收藏该景点");
+        }
+        collectionService.save(buildCollection(userId, TYPE_SCENIC, scenicId));
         return Result.success("收藏成功");
     }
 
@@ -66,18 +62,19 @@ public class CollectionController {
         if (userId == null) {
             return Result.error("请先登录");
         }
-
-        TravelRoute route = routeService.getById(routeId);
-        if (route == null) {
+        if (routeService.getById(routeId) == null) {
             return Result.error("路线不存在");
         }
-
-        UserCollection collection = new UserCollection();
-        collection.setUserId(userId);
-        collection.setType(2);
-        collection.setTargetId(routeId);
-        collectionService.save(collection);
-
+        // 复用 checkCollectionExists 逻辑（type=2 路线）
+        boolean exists = collectionService.lambdaQuery()
+                .eq(UserCollection::getUserId, userId)
+                .eq(UserCollection::getType, TYPE_ROUTE)
+                .eq(UserCollection::getTargetId, routeId)
+                .exists();
+        if (exists) {
+            return Result.error("已收藏该路线");
+        }
+        collectionService.save(buildCollection(userId, TYPE_ROUTE, routeId));
         return Result.success("收藏成功");
     }
 
@@ -87,17 +84,10 @@ public class CollectionController {
         if (userId == null) {
             return Result.error("请先登录");
         }
-
-        QueryWrapper<UserCollection> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", userId);
-        queryWrapper.eq("type", 1);
-        queryWrapper.eq("target_id", scenicId);
-        UserCollection collection = collectionMapper.selectOne(queryWrapper);
-
-        if (collection != null) {
-            collectionService.removeById(collection.getId());
-        }
-
+        collectionService.remove(new LambdaQueryWrapper<UserCollection>()
+                .eq(UserCollection::getUserId, userId)
+                .eq(UserCollection::getType, TYPE_SCENIC)
+                .eq(UserCollection::getTargetId, scenicId));
         return Result.success("取消收藏成功");
     }
 
@@ -107,17 +97,10 @@ public class CollectionController {
         if (userId == null) {
             return Result.error("请先登录");
         }
-
-        QueryWrapper<UserCollection> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", userId);
-        queryWrapper.eq("type", 2);
-        queryWrapper.eq("target_id", routeId);
-        UserCollection collection = collectionMapper.selectOne(queryWrapper);
-
-        if (collection != null) {
-            collectionService.removeById(collection.getId());
-        }
-
+        collectionService.remove(new LambdaQueryWrapper<UserCollection>()
+                .eq(UserCollection::getUserId, userId)
+                .eq(UserCollection::getType, TYPE_ROUTE)
+                .eq(UserCollection::getTargetId, routeId));
         return Result.success("取消收藏成功");
     }
 
@@ -127,28 +110,29 @@ public class CollectionController {
         if (userId == null) {
             return Result.error("请先登录");
         }
-
         List<ScenicVO> scenicList = collectionService.getScenicVOByUserId(userId);
         List<RouteVO> routeList = collectionService.getRouteVOByUserId(userId);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("scenic", scenicList != null ? scenicList : new ArrayList<>());
-        result.put("route", routeList != null ? routeList : new ArrayList<>());
-
+        Map<String, Object> result = new HashMap<>(4);
+        result.put("scenic", scenicList != null ? scenicList : Collections.emptyList());
+        result.put("route", routeList != null ? routeList : Collections.emptyList());
         return Result.success(result);
     }
 
     @GetMapping("/user/{userId}")
     public Result<List<UserCollection>> getUserCollections(@PathVariable Long userId) {
-        if (userId == null) {
-            return Result.error("用户ID不能为空");
-        }
-
-        QueryWrapper<UserCollection> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", userId);
-        queryWrapper.orderByDesc("create_time");
-        List<UserCollection> collections = collectionMapper.selectList(queryWrapper);
-
+        List<UserCollection> collections = collectionService.lambdaQuery()
+                .eq(UserCollection::getUserId, userId)
+                .orderByDesc(UserCollection::getCreateTime)
+                .list();
         return Result.success(collections);
+    }
+
+    private UserCollection buildCollection(Long userId, int type, Long targetId) {
+        UserCollection collection = new UserCollection();
+        collection.setUserId(userId);
+        collection.setType(type);
+        collection.setTargetId(targetId);
+        return collection;
     }
 }

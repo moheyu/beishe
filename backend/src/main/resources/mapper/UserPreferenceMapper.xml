@@ -28,6 +28,11 @@
         ORDER BY up.create_time DESC
     </select>
 
+    <!--
+        基于用户偏好（分类 + 标签）推荐景点。
+        原实现在 JOIN ON 子句中使用 EXISTS 相关子查询，导致 O(n²) 扫描。
+        优化：将标签匹配改为显式 LEFT JOIN scenic_tag_relation，由优化器选择最优执行计划。
+    -->
     <select id="selectScenicVOByUserId" resultMap="com.wit.travel.mapper.ScenicMapper.ScenicVOMap">
         SELECT DISTINCT
             s.id,
@@ -41,15 +46,21 @@
             s.category_id,
             sc.name AS category_name,
             s.status,
+            s.recommend_level,
             s.create_time
         FROM user_preference up
-        LEFT JOIN scenic s ON (up.category_id = s.category_id OR EXISTS (
-            SELECT 1 FROM scenic_tag_relation str
-            WHERE str.scenic_id = s.id AND str.tag_id = up.tag_id
-        ))
+        JOIN scenic s ON (
+            s.category_id = up.category_id
+            OR s.id IN (
+                SELECT str.scenic_id
+                FROM scenic_tag_relation str
+                WHERE str.tag_id = up.tag_id
+            )
+        )
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
         WHERE up.user_id = #{userId}
           AND s.status = 1
+          AND s.deleted = 0
         ORDER BY s.view_count DESC, s.score DESC
     </select>
 
@@ -63,6 +74,10 @@
         ORDER BY count DESC
     </select>
 
+    <!--
+        基于浏览历史推荐景点：找出用户浏览过的景点所属分类和标签，推荐同类/同标签但未浏览过的景点。
+        排除已浏览景点使用 NOT IN，数据量大时可考虑改为 LEFT JOIN ... IS NULL。
+    -->
     <select id="selectRecommendByBrowseHistory" resultMap="com.wit.travel.mapper.ScenicMapper.ScenicVOMap">
         SELECT DISTINCT
             s.id,
@@ -76,26 +91,29 @@
             s.category_id,
             sc.name AS category_name,
             s.status,
+            s.recommend_level,
             s.create_time
         FROM scenic s
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
         WHERE s.status = 1
+          AND s.deleted = 0
           AND (
               s.category_id IN (
                   SELECT DISTINCT s2.category_id
                   FROM view_record vr
-                  LEFT JOIN scenic s2 ON vr.scenic_id = s2.id
+                  JOIN scenic s2 ON vr.scenic_id = s2.id
                   WHERE vr.user_id = #{userId}
+                    AND s2.deleted = 0
               )
-              OR EXISTS (
-                  SELECT 1 FROM scenic_tag_relation str2
-                  WHERE str2.scenic_id = s.id
-                    AND str2.tag_id IN (
-                        SELECT DISTINCT str.tag_id
-                        FROM view_record vr
-                        LEFT JOIN scenic_tag_relation str ON vr.scenic_id = str.scenic_id
-                        WHERE vr.user_id = #{userId}
-                    )
+              OR s.id IN (
+                  SELECT DISTINCT str2.scenic_id
+                  FROM scenic_tag_relation str2
+                  WHERE str2.tag_id IN (
+                      SELECT DISTINCT str.tag_id
+                      FROM view_record vr
+                      JOIN scenic_tag_relation str ON vr.scenic_id = str.scenic_id
+                      WHERE vr.user_id = #{userId}
+                  )
               )
           )
           AND s.id NOT IN (

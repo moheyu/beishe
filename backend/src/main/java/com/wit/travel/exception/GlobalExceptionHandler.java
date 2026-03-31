@@ -1,6 +1,8 @@
 package com.wit.travel.exception;
 
 import com.wit.travel.vo.Result;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -102,16 +104,31 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 处理JWT认证异常
+     * 处理 JWT Token 过期异常
+     */
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<Result<Void>> handleExpiredJwtException(ExpiredJwtException e) {
+        log.warn("JWT Token 已过期：{}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Result.error(401, "登录已过期，请重新登录"));
+    }
+
+    /**
+     * 处理 JWT 签名/格式非法异常
+     */
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<Result<Void>> handleJwtException(JwtException e) {
+        log.warn("JWT Token 无效：{}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Result.error(401, "Token 无效，请重新登录"));
+    }
+
+    /**
+     * 处理其他运行时异常
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Result<Void>> handleRuntimeException(RuntimeException e) {
-        if (e.getMessage() != null && (e.getMessage().contains("令牌") || e.getMessage().contains("JWT"))) {
-            log.error("JWT认证异常：{}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Result.error(401, e.getMessage()));
-        }
         log.error("运行时异常：", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Result.error(500, "系统内部错误，请联系管理员"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Result.error(500, "系统内部错误，请联系管理员"));
     }
 
     /**

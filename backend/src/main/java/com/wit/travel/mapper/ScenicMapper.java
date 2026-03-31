@@ -31,4 +31,11 @@ public interface ScenicMapper extends BaseMapper<Scenic> {
     List<ScenicVO> selectRecommendScenicVOList(@Param("limit") Integer limit);
 
     List<ScenicVO> selectHotScenicList(@Param("limit") Integer limit);
+
+    /**
+     * 原子递增景点浏览量，避免并发更新丢失计数。
+     *
+     * @param scenicId 景点 ID
+     */
+    void incrementViewCount(@Param("scenicId") Long scenicId);
 }

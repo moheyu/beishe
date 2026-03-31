@@ -3,22 +3,16 @@ package com.wit.travel.dto;
 import lombok.Data;
 
 /**
- * 景点查询 DTO
+ * 路线查询 DTO
  */
 @Data
-public class ScenicQueryDTO {
+public class RouteQueryDTO {
 
-    /** 景点名称（模糊搜索） */
+    /** 路线名称（模糊搜索） */
     private String name;
 
     /** 分类 ID */
     private Long categoryId;
-
-    /** 标签 ID */
-    private Long tagId;
-
-    /** 地点（模糊搜索） */
-    private String location;
 
     /** 状态：0-下架，1-上架 */
     private Integer status;
