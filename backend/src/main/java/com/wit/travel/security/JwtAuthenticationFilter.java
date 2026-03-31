@@ -54,7 +54,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // 评论接口需要认证，不能放行
                 requestURI.contains("/uploads/") ||
                 requestURI.contains("/announcement/") ||
-                requestURI.contains("/forum/") ||
+                // 论坛接口：只放行 GET 请求的查询接口
+                (requestURI.startsWith("/forum/") && 
+                    ("GET".equalsIgnoreCase(request.getMethod()) || 
+                     requestURI.contains("/replies"))) ||
                 requestURI.contains("/tag/"))) {
             log.info("放行公开接口：{}", requestURI);
             filterChain.doFilter(request, response);

@@ -17,9 +17,9 @@
         </div>
         <div class="footer-section">
           <h4>联系方式</h4>
-          <p>邮箱：contact@travel.com</p>
-          <p>电话：400-123-4567</p>
-          <p>地址：北京市朝阳区旅游大厦</p>
+          <p>邮箱：2973908609@qq.com</p>
+          <p>电话：18907136495</p>
+
         </div>
       </div>
       <div class="footer-bottom">

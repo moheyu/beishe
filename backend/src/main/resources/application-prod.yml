@@ -2,9 +2,9 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/travel_recommendation?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=true&allowPublicKeyRetrieval=true
-    username: root
-    password: your_production_password
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/travel_recommendation?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:root123}
     hikari:
       minimum-idle: 5
       maximum-pool-size: 20
@@ -15,9 +15,9 @@ spring:
       connection-timeout: 30000
 
   redis:
-    host: localhost
-    port: 6379
-    password: your_redis_password
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
+    password: ${SPRING_REDIS_PASSWORD:}
     database: 0
     lettuce:
       pool:
