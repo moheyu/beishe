@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wit.travel.mapper.ForumPostMapper">
+
+    <resultMap id="ForumPostVOMap" type="com.wit.travel.vo.ForumPostVO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="avatar" column="avatar"/>
+        <result property="scenicId" column="scenic_id"/>
+        <result property="routeId" column="route_id"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="replyCount" column="reply_count"/>
+        <result property="isTop" column="is_top"/>
+        <result property="isEssence" column="is_essence"/>
+        <result property="isAudit" column="is_audit"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="selectForumPostVOById" resultMap="ForumPostVOMap">
+        SELECT
+            fp.id,
+            fp.title,
+            fp.content,
+            fp.user_id,
+            u.username,
+            u.avatar,
+            fp.scenic_id,
+            fp.route_id,
+            fp.view_count,
+            fp.reply_count,
+            fp.is_top,
+            fp.is_essence,
+            fp.is_audit,
+            fp.create_time
+        FROM forum_post fp
+        LEFT JOIN user u ON fp.user_id = u.id
+        WHERE fp.id = #{id}
+          AND fp.deleted = 0
+    </select>
+
+    <select id="selectForumPostVOList" resultMap="ForumPostVOMap">
+        SELECT
+            fp.id,
+            fp.title,
+            fp.content,
+            fp.user_id,
+            u.username,
+            u.avatar,
+            fp.scenic_id,
+            fp.route_id,
+            fp.view_count,
+            fp.reply_count,
+            fp.is_top,
+            fp.is_essence,
+            fp.is_audit,
+            fp.create_time
+        FROM forum_post fp
+        LEFT JOIN user u ON fp.user_id = u.id
+        <where>
+            fp.deleted = 0
+            <if test="query.title != null and query.title != ''">
+                AND fp.title LIKE CONCAT('%', #{query.title}, '%')
+            </if>
+            <if test="query.userId != null">
+                AND fp.user_id = #{query.userId}
+            </if>
+            <if test="query.scenicId != null">
+                AND fp.scenic_id = #{query.scenicId}
+            </if>
+            <if test="query.routeId != null">
+                AND fp.route_id = #{query.routeId}
+            </if>
+            <if test="query.isAudit != null">
+                AND fp.is_audit = #{query.isAudit}
+            </if>
+        </where>
+        ORDER BY fp.is_top DESC, fp.create_time DESC
+    </select>
+
+    <select id="selectRecommendForumPostVOList" resultMap="ForumPostVOMap">
+        SELECT
+            fp.id,
+            fp.title,
+            fp.content,
+            fp.user_id,
+            u.username,
+            u.avatar,
+            fp.scenic_id,
+            fp.route_id,
+            fp.view_count,
+            fp.reply_count,
+            fp.is_top,
+            fp.is_essence,
+            fp.is_audit,
+            fp.create_time
+        FROM forum_post fp
+        LEFT JOIN user u ON fp.user_id = u.id
+        WHERE fp.deleted = 0
+          AND fp.is_audit = 1
+        ORDER BY fp.view_count DESC, fp.reply_count DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

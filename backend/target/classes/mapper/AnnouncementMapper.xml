@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wit.travel.mapper.AnnouncementMapper">
+
+    <resultMap id="AnnouncementVOMap" type="com.wit.travel.vo.AnnouncementVO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="type" column="type"/>
+        <result property="isTop" column="is_top"/>
+        <result property="status" column="status"/>
+        <result property="publishTime" column="publish_time"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="selectAnnouncementVOById" resultMap="AnnouncementVOMap">
+        SELECT
+            a.id,
+            a.title,
+            a.content,
+            a.type,
+            a.is_top,
+            a.status,
+            a.publish_time,
+            a.create_time
+        FROM announcement a
+        WHERE a.id = #{id}
+          AND a.deleted = 0
+    </select>
+
+    <select id="selectAnnouncementVOList" resultMap="AnnouncementVOMap">
+        SELECT
+            a.id,
+            a.title,
+            a.content,
+            a.type,
+            a.is_top,
+            a.status,
+            a.publish_time,
+            a.create_time
+        FROM announcement a
+        WHERE a.deleted = 0
+          AND a.status = 1
+        ORDER BY a.is_top DESC, a.publish_time DESC
+    </select>
+
+</mapper>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wit.travel.mapper.UserCollectionMapper">
+
+    <resultMap id="ScenicVOMap" type="com.wit.travel.vo.ScenicVO">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="images" column="images" typeHandler="com.wit.travel.handler.StringToListTypeHandler"/>
+        <result property="price" column="price"/>
+        <result property="score" column="score"/>
+        <result property="location" column="location"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="RouteVOMap" type="com.wit.travel.vo.RouteVO">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="images" column="images" typeHandler="com.wit.travel.handler.StringToListTypeHandler"/>
+        <result property="durationDays" column="duration_days"/>
+        <result property="budget" column="budget"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="selectScenicVOByUserId" resultMap="ScenicVOMap">
+        SELECT
+            s.id,
+            s.name,
+            s.description,
+            s.images,
+            s.price,
+            s.score,
+            s.location,
+            s.view_count,
+            s.category_id,
+            sc.name AS category_name,
+            s.status,
+            s.create_time
+        FROM user_collection uc
+        LEFT JOIN scenic s ON uc.target_id = s.id
+        LEFT JOIN scenic_category sc ON s.category_id = sc.id
+        WHERE uc.user_id = #{userId}
+          AND uc.type = 1
+        ORDER BY uc.create_time DESC
+    </select>
+
+    <select id="selectRouteVOByUserId" resultMap="RouteVOMap">
+        SELECT
+            r.id,
+            r.name,
+            r.description,
+            r.images,
+            r.duration_days,
+            r.budget,
+            r.status,
+            r.create_time
+        FROM user_collection uc
+        LEFT JOIN travel_route r ON uc.target_id = r.id
+        WHERE uc.user_id = #{userId}
+          AND uc.type = 2
+        ORDER BY uc.create_time DESC
+    </select>
+
+    <select id="checkCollectionExists" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM user_collection
+        WHERE user_id = #{userId}
+          AND type = 1
+          AND target_id = #{scenicId}
+    </select>
+
+</mapper>

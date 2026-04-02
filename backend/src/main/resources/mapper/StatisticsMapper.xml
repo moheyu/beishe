@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wit.travel.mapper.StatisticsMapper">
+
+    <resultMap id="ScenicStatisticsVOMap" type="com.wit.travel.vo.ScenicStatisticsVO">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="collectionCount" column="collection_count"/>
+        <result property="commentCount" column="comment_count"/>
+        <result property="avgScore" column="score"/>
+        <result property="recommendLevel" column="recommend_level"/>
+    </resultMap>
+
+    <resultMap id="RouteStatisticsVOMap" type="com.wit.travel.vo.RouteStatisticsVO">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="collectionCount" column="collection_count"/>
+        <result property="commentCount" column="comment_count"/>
+        <result property="durationDays" column="duration_days"/>
+        <result property="avgBudget" column="budget"/>
+    </resultMap>
+
+    <resultMap id="StatisticsVOMap" type="com.wit.travel.vo.StatisticsVO">
+        <result property="totalScenics" column="total_scenics"/>
+        <result property="totalRoutes" column="total_routes"/>
+        <result property="totalUsers" column="total_users"/>
+        <result property="totalPosts" column="total_posts"/>
+        <result property="totalComments" column="total_comments"/>
+        <result property="totalViews" column="total_views"/>
+        <result property="totalCollections" column="total_collections"/>
+        <result property="activeUsers" column="active_users"/>
+        <result property="activePostsToday" column="active_posts_today"/>
+        <result property="activeUsersWeek" column="active_users_week"/>
+        <result property="avgDailyViews" column="avg_daily_views"/>
+        <result property="topScenicId" column="top_scenic_id"/>
+        <result property="topScenicName" column="top_scenic_name"/>
+        <result property="topRouteId" column="top_route_id"/>
+        <result property="topRouteName" column="top_route_name"/>
+    </resultMap>
+
+    <select id="getTopScenicStatistics" resultMap="ScenicStatisticsVOMap">
+        SELECT
+            s.id,
+            s.name,
+            s.view_count,
+            (SELECT COUNT(*) FROM user_collection WHERE target_id = s.id) AS collection_count,
+            (SELECT COUNT(*) FROM user_comment WHERE target_id = s.id AND type = 1) AS comment_count,
+            s.score,
+            s.recommend_level
+        FROM scenic s
+        WHERE s.status = 1
+        ORDER BY s.view_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="getTopRouteStatistics" resultMap="RouteStatisticsVOMap">
+        SELECT
+            r.id,
+            r.name,
+            r.view_count,
+            (SELECT COUNT(*) FROM user_collection WHERE target_id = r.id AND type = 2) AS collection_count,
+            (SELECT COUNT(*) FROM user_comment WHERE target_id = r.id AND type = 2) AS comment_count,
+            r.duration_days,
+            r.budget
+        FROM travel_route r
+        WHERE r.deleted = 0
+          AND r.status = 1
+        ORDER BY r.view_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="getScenicCount" resultType="long">
+        SELECT COUNT(*) FROM scenic
+    </select>
+
+    <select id="getRouteCount" resultType="long">
+        SELECT COUNT(*) FROM travel_route WHERE deleted = 0
+    </select>
+
+    <select id="getUserCount" resultType="long">
+        SELECT COUNT(*) FROM user
+    </select>
+
+    <select id="getCollectionCount" resultType="long">
+        SELECT COUNT(*) FROM user_collection
+    </select>
+
+    <select id="getScenicTotalViews" resultType="long">
+        SELECT COALESCE(SUM(view_count), 0) FROM scenic
+    </select>
+
+    <select id="getForumPostCount" resultType="long">
+        SELECT COUNT(*) FROM forum_post WHERE deleted = 0
+    </select>
+
+    <select id="getCommentCount" resultType="long">
+        SELECT COUNT(*) FROM user_comment
+    </select>
+
+    <select id="getOverallStatistics" resultMap="StatisticsVOMap">
+        SELECT
+            (SELECT COUNT(*) FROM scenic) AS total_scenics,
+            (SELECT COUNT(*) FROM travel_route WHERE deleted = 0) AS total_routes,
+            (SELECT COUNT(*) FROM user) AS total_users,
+            (SELECT COALESCE(COUNT(*), 0) FROM forum_post WHERE deleted = 0) AS total_posts,
+            (SELECT COALESCE(COUNT(*), 0) FROM user_comment) AS total_comments,
+            (SELECT COALESCE(SUM(view_count), 0) FROM scenic) AS total_views,
+            (SELECT COALESCE(COUNT(*), 0) FROM user_collection) AS total_collections,
+            0 AS active_users,
+            0 AS active_posts_today,
+            0 AS active_users_week,
+            0.0 AS avg_daily_views,
+            NULL AS top_scenic_id,
+            NULL AS top_scenic_name,
+            NULL AS top_route_id,
+            NULL AS top_route_name
+    </select>
+
+    <select id="getTotalPreferences" resultType="long">
+        SELECT COUNT(*) FROM user_preference
+    </select>
+
+    <select id="getTotalViewRecords" resultType="long">
+        SELECT COUNT(*) FROM view_record
+    </select>
+
+    <select id="getPreferenceCategoryStats" resultType="map">
+        SELECT
+            COALESCE(sc.name, '未分类') AS category_name,
+            COUNT(*) AS count
+        FROM user_preference up
+        LEFT JOIN scenic_category sc ON up.category_id = sc.id
+        GROUP BY up.category_id, sc.name
+        ORDER BY count DESC
+    </select>
+
+</mapper>
