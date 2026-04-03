@@ -17,4 +17,8 @@ public interface ViewRecordMapper extends BaseMapper<ViewRecord> {
     List<ScenicVO> selectScenicVOByUserId(@Param("userId") Long userId);
 
     Long selectTotalViews();
+
+    Long selectTotalViewsByUserId(@Param("userId") Long userId);
+
+    List<Long> selectOldestRecordIds(@Param("userId") Long userId, @Param("limit") int limit);
 }

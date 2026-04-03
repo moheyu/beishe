@@ -4,26 +4,45 @@
       <h2>浏览历史</h2>
       <el-button type="danger" @click="handleClearHistory">清空历史</el-button>
     </div>
-    <el-card v-for="record in viewRecords" :key="record.id" class="history-item">
-      <div class="item-content">
-        <el-image :src="record.images && record.images.length > 0 ? getImageUrl(record.images[0]) : ''" fit="cover" class="item-image" />
-        <div class="item-info">
-          <h3>{{ record.name }}</h3>
-          <p class="item-time">{{ formatTime(record.viewTime) }}</p>
+    <div class="history-list">
+      <el-card v-for="record in currentPageRecords" :key="record.id" class="history-item">
+        <div class="item-content">
+          <el-image :src="record.images && record.images.length > 0 ? getImageUrl(record.images[0]) : ''" fit="cover" class="item-image" />
+          <div class="item-info">
+            <h3>{{ record.name }}</h3>
+            <p class="item-time">{{ formatTime(record.viewTime) }}</p>
+          </div>
         </div>
-      </div>
-    </el-card>
-    <el-empty v-if="!viewRecords.length" description="暂无浏览记录" />
+      </el-card>
+      <el-empty v-if="!viewRecords.length" description="暂无浏览记录" />
+    </div>
+    <div class="pagination-wrapper" v-if="viewRecords.length > 0">
+      <el-pagination
+        v-model:current-page="currentPage"
+        :page-size="pageSize"
+        :total="viewRecords.length"
+        layout="prev, pager, next"
+        @current-change="handleCurrentChange"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getUserViewRecords, clearUserViewRecords } from '@/api/viewRecord'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getImageUrl } from '@/utils/image'
 
 const viewRecords = ref([])
+const currentPage = ref(1)
+const pageSize = ref(9)
+
+const currentPageRecords = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return viewRecords.value.slice(start, end)
+})
 
 const formatTime = (time) => {
   if (!time) return ''
@@ -34,6 +53,7 @@ const loadViewRecords = async () => {
   try {
     const res = await getUserViewRecords()
     viewRecords.value = res || []
+    currentPage.value = 1 // 重置到第一页
   } catch (error) {
     console.error('加载浏览记录失败', error)
     ElMessage.error('加载浏览记录失败')
@@ -57,6 +77,10 @@ const handleClearHistory = () => {
   })
 }
 
+const handleCurrentChange = (page) => {
+  currentPage.value = page
+}
+
 onMounted(() => {
   loadViewRecords()
 })
@@ -71,6 +95,10 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
+}
+
+.history-list {
   margin-bottom: 20px;
 }
 
@@ -105,5 +133,11 @@ onMounted(() => {
   margin: 0;
   font-size: 14px;
   color: #999;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 </style>

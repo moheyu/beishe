@@ -116,13 +116,16 @@ import { Search, ArrowRight, Calendar, Money } from '@element-plus/icons-vue'
 import { getRecommendScenic } from '@/api/scenic'
 import { getRecommendRoute } from '@/api/route'
 import { getAnnouncementList } from '@/api/announcement'
+import { getHybridRecommend } from '@/api/preference'
 import { getImageUrl } from '@/utils/image'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
 const searchKeyword = ref('')
 const recommendScenic = ref([])
 const recommendRoute = ref([])
 const announcements = ref([])
+const userStore = useUserStore()
 
 const banners = [
   {
@@ -161,11 +164,26 @@ const formatTime = (time) => {
 
 const loadData = async () => {
   try {
-    const [scenicRes, routeRes, announcementRes] = await Promise.all([
-      getRecommendScenic({ limit: 8 }),
+    let scenicRes, routeRes
+    
+    // 已登录用户使用个性化推荐，未登录使用全局推荐
+    if (userStore.isLoggedIn) {
+      try {
+        scenicRes = await getHybridRecommend({ limit: 8 })
+      } catch (e) {
+        // 如果个性化推荐失败，使用全局推荐
+        scenicRes = await getRecommendScenic({ limit: 8 })
+      }
+    } else {
+      scenicRes = await getRecommendScenic({ limit: 8 })
+    }
+    
+    const [routeResTmp, announcementRes] = await Promise.all([
       getRecommendRoute({ limit: 6 }),
       getAnnouncementList({ page: 1, size: 5 })
     ])
+    
+    routeRes = routeResTmp
     recommendScenic.value = scenicRes || []
     recommendRoute.value = routeRes || []
     announcements.value = announcementRes || []

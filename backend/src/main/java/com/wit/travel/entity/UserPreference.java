@@ -37,6 +37,16 @@ public class UserPreference implements Serializable {
     private Long tagId;
 
     /**
+     * 预算范围
+     */
+    private Integer budget;
+
+    /**
+     * 出行季节：spring/summer/autumn/winter/all
+     */
+    private String season;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)

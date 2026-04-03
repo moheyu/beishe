@@ -38,10 +38,8 @@ public class ViewRecordController {
             return Result.error("景点不存在");
         }
 
-        ViewRecord record = new ViewRecord();
-        record.setUserId(userId);
-        record.setScenicId(scenicId);
-        viewRecordService.save(record);
+        // 使用 upsert 逻辑：存在则更新时间，不存在则插入，并保持最多18条记录
+        viewRecordService.upsertViewRecord(userId, scenicId);
 
         scenic.setViewCount(scenic.getViewCount() + 1);
         scenicService.updateById(scenic);

@@ -38,10 +38,22 @@
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
         WHERE vr.user_id = #{userId}
         ORDER BY vr.view_time DESC
+        LIMIT 18
     </select>
 
     <select id="selectTotalViews" resultType="java.lang.Long">
         SELECT COUNT(*) FROM view_record
+    </select>
+
+    <select id="selectTotalViewsByUserId" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM view_record WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectOldestRecordIds" resultType="java.lang.Long">
+        SELECT id FROM view_record 
+        WHERE user_id = #{userId} 
+        ORDER BY view_time ASC 
+        LIMIT #{limit}
     </select>
 
 </mapper>

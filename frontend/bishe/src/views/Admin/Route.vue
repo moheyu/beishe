@@ -80,8 +80,8 @@ const loadRouteList = async () => {
   loading.value = true
   try {
     const params = {
-      page: query.pageNum,
-      size: query.pageSize
+      pageNum: query.pageNum,
+      pageSize: query.pageSize
     }
     const res = await getAdminRouteList(params)
     routeList.value = res?.records || []

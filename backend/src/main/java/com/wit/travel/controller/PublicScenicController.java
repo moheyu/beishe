@@ -37,7 +37,7 @@ public class PublicScenicController {
     @GetMapping("/list")
     public Result<IPage<ScenicVO>> getScenicList(ScenicQueryDTO queryDTO) {
         Page<ScenicVO> page = new Page<>(queryDTO.getPageNum() != null ? queryDTO.getPageNum() : 1,
-                queryDTO.getPageSize() != null ? queryDTO.getPageSize() : 10);
+                queryDTO.getPageSize() != null ? queryDTO.getPageSize() : 12);
         IPage<ScenicVO> voPage = scenicService.getScenicVOList(page, queryDTO);
         return Result.success(voPage);
     }
@@ -50,7 +50,7 @@ public class PublicScenicController {
     @GetMapping("/page")
     public Result<IPage<ScenicVO>> getScenicPage(ScenicQueryDTO queryDTO) {
         Page<ScenicVO> page = new Page<>(queryDTO.getPageNum() != null ? queryDTO.getPageNum() : 1,
-                queryDTO.getPageSize() != null ? queryDTO.getPageSize() : 10);
+                queryDTO.getPageSize() != null ? queryDTO.getPageSize() : 12);
         IPage<ScenicVO> voPage = scenicService.getScenicVOList(page, queryDTO);
         return Result.success(voPage);
     }

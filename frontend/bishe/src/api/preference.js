@@ -21,8 +21,8 @@ export const getRecommendScenic = () => {
 }
 
 // 获取混合推荐
-export const getHybridRecommend = () => {
-  return request.get('/preference/recommend/hybrid')
+export const getHybridRecommend = (params) => {
+  return request.get('/preference/recommend/hybrid', { params })
 }
 
 // 获取用户偏好

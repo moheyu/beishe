@@ -10,6 +10,8 @@ public class PreferenceDetailVO {
     private String categoryName;
     private Long tagId;
     private String tagName;
+    private Integer budget;
+    private String season;
     private LocalDateTime createTime;
 
     public Long getId() {
@@ -58,6 +60,22 @@ public class PreferenceDetailVO {
 
     public void setTagName(String tagName) {
         this.tagName = tagName;
+    }
+
+    public Integer getBudget() {
+        return budget;
+    }
+
+    public void setBudget(Integer budget) {
+        this.budget = budget;
+    }
+
+    public String getSeason() {
+        return season;
+    }
+
+    public void setSeason(String season) {
+        this.season = season;
     }
 
     public LocalDateTime getCreateTime() {

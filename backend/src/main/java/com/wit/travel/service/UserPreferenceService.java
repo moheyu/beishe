@@ -20,5 +20,5 @@ public interface UserPreferenceService extends IService<UserPreference> {
 
     List<ScenicVO> getRecommendByBrowseHistory(Long userId);
 
-    List<ScenicVO> getHybridRecommend(Long userId);
+    List<ScenicVO> getHybridRecommend(Long userId, Integer limit);
 }

@@ -73,7 +73,7 @@
         v-model:page-size="query.pageSize"
         :total="total"
         :page-sizes="[12, 24, 36]"
-        layout="total, sizes, prev, pager, next"
+        layout="total, sizes, prev, pager, next, jumper"
         @size-change="handleSizeChange"
         @current-change="handlePageChange"
       />
@@ -116,8 +116,8 @@ const loadScenicList = async () => {
   loading.value = true
   try {
     const params = {
-      page: query.pageNum,
-      size: query.pageSize,
+      pageNum: query.pageNum,
+      pageSize: query.pageSize,
       keyword: query.keyword,
       categoryId: query.categoryId
     }

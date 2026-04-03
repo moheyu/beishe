@@ -9,6 +9,8 @@
         <result property="categoryName" column="category_name"/>
         <result property="tagId" column="tag_id"/>
         <result property="tagName" column="tag_name"/>
+        <result property="budget" column="budget"/>
+        <result property="season" column="season"/>
         <result property="createTime" column="create_time"/>
     </resultMap>
 
@@ -20,6 +22,8 @@
             sc.name AS category_name,
             up.tag_id,
             st.name AS tag_name,
+            up.budget,
+            up.season,
             up.create_time
         FROM user_preference up
         LEFT JOIN scenic_category sc ON up.category_id = sc.id
@@ -43,12 +47,10 @@
             s.status,
             s.create_time
         FROM user_preference up
-        LEFT JOIN scenic s ON (up.category_id = s.category_id OR EXISTS (
-            SELECT 1 FROM scenic_tag_relation str
-            WHERE str.scenic_id = s.id AND str.tag_id = up.tag_id
-        ))
+        INNER JOIN scenic s ON up.category_id = s.category_id
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
         WHERE up.user_id = #{userId}
+          AND up.category_id IS NOT NULL
           AND s.status = 1
         ORDER BY s.view_count DESC, s.score DESC
     </select>

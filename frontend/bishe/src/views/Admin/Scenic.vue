@@ -160,8 +160,8 @@ const loadScenicList = async () => {
   loading.value = true
   try {
     const params = {
-      page: query.pageNum,
-      size: query.pageSize,
+      pageNum: query.pageNum,
+      pageSize: query.pageSize,
       keyword: query.keyword,
       categoryId: query.categoryId,
       status: query.status

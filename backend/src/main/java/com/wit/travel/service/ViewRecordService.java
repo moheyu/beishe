@@ -14,4 +14,6 @@ public interface ViewRecordService extends IService<ViewRecord> {
     List<ScenicVO> getScenicVOByUserId(Long userId);
 
     void clearByUserId(Long userId);
+
+    void upsertViewRecord(Long userId, Long scenicId);
 }

@@ -98,11 +98,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Spring Security 核心依赖 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
+
 
         <dependency>
             <groupId>cn.hutool</groupId>
