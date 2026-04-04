@@ -86,6 +86,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/uploads/**", "/upload/**").permitAll()
                 .antMatchers("/announcement/**", "/forum/**").permitAll()
                 .antMatchers("/tag/**").permitAll()
+                .antMatchers("/rating/**").permitAll()
                 // 需要登录的接口
                 .antMatchers("/comment/**").authenticated()
                 .antMatchers("/collection/**").authenticated()

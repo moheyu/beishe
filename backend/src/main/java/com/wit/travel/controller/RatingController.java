@@ -1,10 +1,13 @@
 package com.wit.travel.controller;
 
+import com.wit.travel.entity.Scenic;
 import com.wit.travel.entity.UserRating;
+import com.wit.travel.service.ScenicService;
 import com.wit.travel.service.UserRatingService;
 import com.wit.travel.util.SecurityUtil;
 import com.wit.travel.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -17,7 +20,11 @@ public class RatingController {
     @Autowired
     private UserRatingService userRatingService;
 
+    @Autowired
+    private ScenicService scenicService;
+
     @PostMapping("/{scenicId}")
+    @Transactional
     public Result<String> rateScenic(@PathVariable Long scenicId, @RequestParam Integer score) {
         Long userId = SecurityUtil.getCurrentUserId();
         if (userId == null) {
@@ -29,7 +36,26 @@ public class RatingController {
         }
 
         userRatingService.saveOrUpdateRating(userId, scenicId, score);
+
+        Scenic scenic = scenicService.getById(scenicId);
+        if (scenic != null) {
+            Double avgScore = userRatingService.getAverageScore(scenicId);
+            if (avgScore != null) {
+                int newRecommendLevel = calculateRecommendLevel(avgScore);
+                scenic.setRecommendLevel(newRecommendLevel);
+                scenicService.updateById(scenic);
+            }
+        }
+
         return Result.success("评分成功");
+    }
+
+    private int calculateRecommendLevel(Double avgScore) {
+        if (avgScore == null) return 0;
+        if (avgScore >= 4.5) return 3;
+        if (avgScore >= 4.0) return 2;
+        if (avgScore >= 3.5) return 1;
+        return 0;
     }
 
     @GetMapping("/{scenicId}")

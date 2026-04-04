@@ -12,6 +12,7 @@ D:\bishe\backend\src\main\java\com\wit\travel\service\ScenicService.java
 D:\bishe\backend\src\main\java\com\wit\travel\service\ScenicTagRelationService.java
 D:\bishe\backend\src\main\java\com\wit\travel\vo\UserVO.java
 D:\bishe\backend\src\main\java\com\wit\travel\service\impl\ViewRecordServiceImpl.java
+D:\bishe\backend\src\main\java\com\wit\travel\controller\RatingController.java
 D:\bishe\backend\src\main\java\com\wit\travel\vo\Result.java
 D:\bishe\backend\src\main\java\com\wit\travel\controller\UploadController.java
 D:\bishe\backend\src\main\java\com\wit\travel\entity\UserPreference.java
@@ -32,6 +33,7 @@ D:\bishe\backend\src\main\java\com\wit\travel\service\UploadService.java
 D:\bishe\backend\src\main\java\com\wit\travel\config\SecurityConfig.java
 D:\bishe\backend\src\main\java\com\wit\travel\dto\ScenicQueryDTO.java
 D:\bishe\backend\src\main\java\com\wit\travel\mapper\StatisticsMapper.java
+D:\bishe\backend\src\main\java\com\wit\travel\mapper\UserRatingMapper.java
 D:\bishe\backend\src\main\java\com\wit\travel\controller\AuthController.java
 D:\bishe\backend\src\main\java\com\wit\travel\dto\ForumReplyAddDTO.java
 D:\bishe\backend\src\main\java\com\wit\travel\controller\PublicScenicController.java
@@ -65,6 +67,7 @@ D:\bishe\backend\src\main\java\com\wit\travel\service\impl\RouteCategoryServiceI
 D:\bishe\backend\src\main\java\com\wit\travel\controller\ScenicCategoryController.java
 D:\bishe\backend\src\main\java\com\wit\travel\handler\StringToListTypeHandler.java
 D:\bishe\backend\src\main\java\com\wit\travel\entity\User.java
+D:\bishe\backend\src\main\java\com\wit\travel\entity\UserRating.java
 D:\bishe\backend\src\main\java\com\wit\travel\dto\UserUpdateDTO.java
 D:\bishe\backend\src\main\java\com\wit\travel\dto\ForumPostQueryDTO.java
 D:\bishe\backend\src\main\java\com\wit\travel\mapper\AnnouncementMapper.java
@@ -81,6 +84,7 @@ D:\bishe\backend\src\main\java\com\wit\travel\config\WebConfig.java
 D:\bishe\backend\src\main\java\com\wit\travel\controller\TagController.java
 D:\bishe\backend\src\main\java\com\wit\travel\service\RouteCategoryService.java
 D:\bishe\backend\src\main\java\com\wit\travel\entity\ScenicCategory.java
+D:\bishe\backend\src\main\java\com\wit\travel\service\UserRatingService.java
 D:\bishe\backend\src\main\java\com\wit\travel\service\impl\RouteScenicRelationServiceImpl.java
 D:\bishe\backend\src\main\java\com\wit\travel\dto\RegisterDTO.java
 D:\bishe\backend\src\main\java\com\wit\travel\entity\Announcement.java
@@ -95,6 +99,7 @@ D:\bishe\backend\src\main\java\com\wit\travel\dto\AnnouncementAddDTO.java
 D:\bishe\backend\src\main\java\com\wit\travel\entity\ForumReply.java
 D:\bishe\backend\src\main\java\com\wit\travel\service\ScenicTagService.java
 D:\bishe\backend\src\main\java\com\wit\travel\entity\ScenicTag.java
+D:\bishe\backend\src\main\java\com\wit\travel\service\impl\UserRatingServiceImpl.java
 D:\bishe\backend\src\main\java\com\wit\travel\exception\ForbiddenException.java
 D:\bishe\backend\src\main\java\com\wit\travel\vo\ScenicStatisticsVO.java
 D:\bishe\backend\src\main\java\com\wit\travel\vo\ScenicVO.java
@@ -118,6 +123,7 @@ D:\bishe\backend\src\main\java\com\wit\travel\service\impl\UploadServiceImpl.jav
 D:\bishe\backend\src\main\java\com\wit\travel\controller\StatisticsController.java
 D:\bishe\backend\src\main\java\com\wit\travel\service\ForumPostService.java
 D:\bishe\backend\src\main\java\com\wit\travel\entity\RouteCategory.java
+D:\bishe\backend\src\main\java\com\wit\travel\config\MybatisPlusConfig.java
 D:\bishe\backend\src\main\java\com\wit\travel\service\StatisticsService.java
 D:\bishe\backend\src\main\java\com\wit\travel\service\impl\ScenicTagRelationServiceImpl.java
 D:\bishe\backend\src\main\java\com\wit\travel\util\JwtUtil.java

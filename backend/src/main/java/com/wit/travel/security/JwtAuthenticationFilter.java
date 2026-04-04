@@ -51,6 +51,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // 公开接口
                 (requestURI.startsWith("/scenic/") && !requestURI.startsWith("/admin/scenic")) ||
                 (requestURI.startsWith("/route/") && !requestURI.startsWith("/admin/route")) ||
+                // 评分接口公开（GET），POST需要登录由Controller控制
+                requestURI.startsWith("/rating/") ||
                 // 评论接口需要认证，不能放行
                 requestURI.contains("/uploads/") ||
                 requestURI.contains("/announcement/") ||
