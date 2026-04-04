@@ -7,8 +7,10 @@ import com.wit.travel.dto.ScenicQueryDTO;
 import com.wit.travel.entity.Scenic;
 import com.wit.travel.mapper.ScenicMapper;
 import com.wit.travel.service.ScenicService;
+import com.wit.travel.service.UserRatingService;
 import com.wit.travel.vo.ScenicDetailVO;
 import com.wit.travel.vo.ScenicVO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +21,9 @@ import java.util.List;
 @Service
 public class ScenicServiceImpl extends ServiceImpl<ScenicMapper, Scenic> implements ScenicService {
 
+    @Autowired
+    private UserRatingService userRatingService;
+
     @Override
     public ScenicVO getScenicVOById(Long id) {
         return baseMapper.selectScenicVOById(id);
@@ -26,7 +31,16 @@ public class ScenicServiceImpl extends ServiceImpl<ScenicMapper, Scenic> impleme
 
     @Override
     public ScenicDetailVO getScenicDetailVOById(Long id) {
-        return baseMapper.selectScenicDetailVOById(id);
+        ScenicDetailVO detailVO = baseMapper.selectScenicDetailVOById(id);
+        
+        if (detailVO != null) {
+            Double avgScore = userRatingService.getAverageScore(id);
+            Integer ratingCount = userRatingService.getRatingCount(id);
+            detailVO.setAverageScore(avgScore);
+            detailVO.setRatingCount(ratingCount);
+        }
+        
+        return detailVO;
     }
 
     @Override

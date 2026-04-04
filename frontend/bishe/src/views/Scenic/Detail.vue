@@ -25,11 +25,24 @@
           </div>
           
           <div class="rating-section">
-            <div v-if="Number(scenic.score) > 0">
-              <el-rate :model-value="Number(scenic.score)" :max="5" disabled show-score />
-              <span class="rating-text">{{ scenic.score }}分</span>
+            <div v-if="scenic.averageScore > 0">
+              <el-rate :model-value="scenic.averageScore" :max="5" disabled show-score />
+              <span class="rating-text">{{ scenic.averageScore.toFixed(1) }}分</span>
+              <span class="rating-count">({{ scenic.ratingCount }}人评分)</span>
             </div>
             <span v-else class="no-rating">暂无评分</span>
+            
+            <div v-if="userStore.isLoggedIn" class="user-rating">
+              <span>我要评分：</span>
+              <el-rate 
+                v-model="userScore" 
+                :max="5" 
+                show-score 
+                :disabled="userScore > 0"
+                @change="handleRate"
+              />
+              <span v-if="userScore > 0" class="rated-text">已评分</span>
+            </div>
           </div>
           
           <div class="price-section">
@@ -114,6 +127,8 @@ import { getScenicComments, addComment } from '@/api/comment'
 import { getImageUrl } from '@/utils/image'
 import { addScenicCollection, removeScenicCollection } from '@/api/collection'
 import { addViewRecord } from '@/api/viewRecord'
+import { rateScenic } from '@/api/rating'
+import { useUserStore } from '@/stores/user'
 
 const route = useRoute()
 const scenic = ref(null)
@@ -121,6 +136,8 @@ const activeTab = ref('intro')
 const isCollected = ref(false)
 const comments = ref([])
 const commentContent = ref('')
+const userScore = ref(0)
+const userStore = useUserStore()
 
 // 格式化时间
 const formatTime = (time) => {
@@ -140,6 +157,17 @@ const loadScenicDetail = async () => {
     const res = await getScenicDetail(id)
     scenic.value = res
     loadComments()
+    // 加载用户评分
+    if (userStore.isLoggedIn) {
+      try {
+        const ratingRes = await (await import('@/api/rating')).getScenicRating(id)
+        if (ratingRes && ratingRes.userScore) {
+          userScore.value = ratingRes.userScore
+        }
+      } catch (e) {
+        // 忽略评分获取错误
+      }
+    }
     // 记录浏览历史
     try {
       await addViewRecord(id)
@@ -176,6 +204,21 @@ const handleCollect = async () => {
   } catch (error) {
     console.error('操作收藏失败', error)
     ElMessage.error('操作收藏失败，请先登录')
+  }
+}
+
+const handleRate = async (score) => {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录')
+    return
+  }
+  try {
+    await rateScenic(route.params.id, score)
+    ElMessage.success('评分成功')
+    loadScenicDetail()
+  } catch (error) {
+    console.error('评分失败', error)
+    ElMessage.error('评分失败')
   }
 }
 
@@ -391,6 +434,24 @@ onMounted(() => {
 .no-rating {
   color: #999;
   font-size: 16px;
+}
+
+.rating-count {
+  margin-left: 8px;
+  color: #999;
+  font-size: 14px;
+}
+
+.user-rating {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rated-text {
+  color: #67c23a;
+  font-size: 14px;
 }
 
 @media (max-width: 768px) {

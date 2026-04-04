@@ -40,7 +40,7 @@
             s.description,
             s.images,
             s.price,
-            s.score,
+            IFNULL(ur.avg_score, s.score) AS score,
             s.location,
             s.view_count,
             s.category_id,
@@ -50,6 +50,10 @@
             s.create_time
         FROM scenic s
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
+        LEFT JOIN (
+            SELECT scenic_id, AVG(score) AS avg_score 
+            FROM user_rating GROUP BY scenic_id
+        ) ur ON s.id = ur.scenic_id
         WHERE s.id = #{id}
           AND s.deleted = 0
     </select>
@@ -94,7 +98,7 @@
         s.description,
         s.images,
         s.price,
-        s.score,
+        IFNULL(ur.avg_score, s.score) AS score,
         s.location,
         s.view_count,
         s.category_id,
@@ -104,6 +108,10 @@
         s.create_time
         FROM scenic s
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
+        LEFT JOIN (
+            SELECT scenic_id, AVG(score) AS avg_score 
+            FROM user_rating GROUP BY scenic_id
+        ) ur ON s.id = ur.scenic_id
         <where>
             <if test="query.name != null and query.name != ''">
                 AND s.name LIKE CONCAT('%', #{query.name}, '%')
@@ -178,7 +186,7 @@
             s.description,
             s.images,
             s.price,
-            s.score,
+            IFNULL(ur.avg_score, s.score) AS score,
             s.location,
             s.view_count,
             s.category_id,
@@ -188,8 +196,12 @@
             s.create_time
         FROM scenic s
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
+        LEFT JOIN (
+            SELECT scenic_id, AVG(score) AS avg_score 
+            FROM user_rating GROUP BY scenic_id
+        ) ur ON s.id = ur.scenic_id
         WHERE s.status = 1
-        ORDER BY s.view_count DESC, s.score DESC
+        ORDER BY s.view_count DESC, IFNULL(ur.avg_score, s.score) DESC
         LIMIT #{limit}
     </select>
 
@@ -200,7 +212,7 @@
             s.description,
             s.images,
             s.price,
-            s.score,
+            IFNULL(ur.avg_score, s.score) AS score,
             s.location,
             s.view_count,
             s.category_id,
@@ -210,6 +222,10 @@
             s.create_time
         FROM scenic s
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
+        LEFT JOIN (
+            SELECT scenic_id, AVG(score) AS avg_score 
+            FROM user_rating GROUP BY scenic_id
+        ) ur ON s.id = ur.scenic_id
         WHERE s.status = 1
         ORDER BY s.view_count DESC
         LIMIT #{limit}

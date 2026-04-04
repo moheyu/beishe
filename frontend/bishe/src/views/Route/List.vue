@@ -113,7 +113,7 @@ const loadRouteList = async () => {
     const params = {
       pageNum: query.pageNum,
       pageSize: query.pageSize,
-      keyword: query.keyword,
+      name: query.keyword,
       categoryId: query.categoryId
     }
     const res = await getRouteList(params)

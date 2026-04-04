@@ -29,6 +29,10 @@ public class ScenicVO {
 
     private BigDecimal score;
 
+    private Double averageScore;
+
+    private Integer ratingCount;
+
     private String location;
 
     private Integer viewCount;
