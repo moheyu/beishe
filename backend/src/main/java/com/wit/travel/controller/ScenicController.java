@@ -295,10 +295,7 @@ public class ScenicController {
             if (dto.getLocation() != null) {
                 existing.setLocation(dto.getLocation());
             }
-            if (dto.getOpeningHours() != null) {
-                existing.setOpeningHours(dto.getOpeningHours());
-            }
-            if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+            if (dto.getImages() != null) {
                 existing.setImages(dto.getImages());
             }
             if (dto.getStatus() != null) {

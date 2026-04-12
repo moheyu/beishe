@@ -3,7 +3,6 @@ package com.wit.travel.dto;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Data
 public class ScenicUpdateDTO {
@@ -16,11 +15,9 @@ public class ScenicUpdateDTO {
 
     private String location;
 
-    private String openingHours;
-
     private String description;
 
-    private List<String> images;
+    private String images;
 
     private Integer status;
 

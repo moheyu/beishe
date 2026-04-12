@@ -122,6 +122,9 @@
             FROM user_rating GROUP BY scenic_id
         ) ur ON s.id = ur.scenic_id
         <where>
+            <if test="query.keyword != null and query.keyword != ''">
+                AND (s.name LIKE CONCAT('%', #{query.keyword}, '%') OR s.location LIKE CONCAT('%', #{query.keyword}, '%'))
+            </if>
             <if test="query.name != null and query.name != ''">
                 AND s.name LIKE CONCAT('%', #{query.name}, '%')
             </if>
