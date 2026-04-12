@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wit.travel.dto.ScenicAddDTO;
+import com.wit.travel.dto.ScenicUpdateDTO;
 import com.wit.travel.dto.ScenicQueryDTO;
 import com.wit.travel.entity.Scenic;
 import com.wit.travel.entity.ScenicCategory;
@@ -259,7 +260,7 @@ public class ScenicController {
     }
 
     @PutMapping("/{id}")
-    public Result<String> updateScenic(@PathVariable Long id, @Valid @RequestBody ScenicAddDTO dto) {
+    public Result<String> updateScenic(@PathVariable Long id, @RequestBody ScenicUpdateDTO dto) {
         try {
             log.info("开始更新景点，ID：{}，参数：{}", id, dto);
             
@@ -270,21 +271,42 @@ public class ScenicController {
                 return Result.error("景点不存在");
             }
 
-            // 2. 验证分类是否存在
+            // 2. 如果传了分类ID，验证分类是否存在
             Long categoryId = dto.getCategoryId();
-            ScenicCategory category = scenicCategoryService.getById(categoryId);
-            if (category == null) {
-                log.error("景点分类不存在，ID：{}", categoryId);
-                return Result.error("景点分类不存在");
+            if (categoryId != null) {
+                ScenicCategory category = scenicCategoryService.getById(categoryId);
+                if (category == null) {
+                    log.error("景点分类不存在，ID：{}", categoryId);
+                    return Result.error("景点分类不存在");
+                }
+                existing.setCategoryId(categoryId);
             }
 
-            // 3. 更新景点信息
-            existing.setName(dto.getName());
-            existing.setDescription(dto.getDescription());
-            existing.setPrice(dto.getPrice());
-            existing.setLocation(dto.getLocation());
-            existing.setCategoryId(categoryId);
-            // 保持原有状态不变，不更新状态字段
+            // 3. 更新景点信息（仅更新非空字段）
+            if (dto.getName() != null) {
+                existing.setName(dto.getName());
+            }
+            if (dto.getDescription() != null) {
+                existing.setDescription(dto.getDescription());
+            }
+            if (dto.getPrice() != null) {
+                existing.setPrice(dto.getPrice());
+            }
+            if (dto.getLocation() != null) {
+                existing.setLocation(dto.getLocation());
+            }
+            if (dto.getOpeningHours() != null) {
+                existing.setOpeningHours(dto.getOpeningHours());
+            }
+            if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+                existing.setImages(dto.getImages());
+            }
+            if (dto.getStatus() != null) {
+                existing.setStatus(dto.getStatus());
+            }
+            if (dto.getRecommendLevel() != null) {
+                existing.setRecommendLevel(dto.getRecommendLevel());
+            }
 
             // 4. 处理图片
             if (dto.getImages() != null && !dto.getImages().isEmpty()) {
