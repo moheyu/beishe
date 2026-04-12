@@ -3,9 +3,9 @@
     <el-card class="post-card" v-loading="loading">
       <h1 class="post-title">{{ post.title }}</h1>
       <div class="post-meta">
-        <el-avatar :size="40" :src="post.authorAvatar || ''" />
+        <el-avatar :size="40" :src="post.avatar ? getImageUrl(post.avatar) : ''" />
         <div class="meta-info">
-          <span class="author">{{ post.authorName }}</span>
+          <span class="author">{{ post.username }}</span>
           <span class="time">{{ formatTime(post.createTime) }}</span>
         </div>
       </div>
@@ -30,7 +30,7 @@
       <div v-if="replies.length > 0" class="reply-list">
         <div v-for="reply in replies" :key="reply.id" class="reply-item">
           <div class="reply-header">
-            <el-avatar :size="32" :src="reply.avatar || ''" />
+            <el-avatar :size="32" :src="reply.avatar ? getImageUrl(reply.avatar) : ''" />
             <div class="reply-user">
               <span class="username">{{ reply.username }}</span>
               <span class="time">{{ formatTime(reply.createTime) }}</span>
@@ -48,6 +48,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getForumPostDetail, getForumReplyList, addForumReply } from '@/api/forum'
+import { getImageUrl } from '@/utils/image'
 import { ElMessage } from 'element-plus'
 
 const route = useRoute()
