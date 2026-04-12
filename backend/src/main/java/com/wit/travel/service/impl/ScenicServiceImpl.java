@@ -43,22 +43,46 @@ public class ScenicServiceImpl extends ServiceImpl<ScenicMapper, Scenic> impleme
 
     @Override
     public IPage<ScenicVO> getScenicVOList(Page<ScenicVO> page, ScenicQueryDTO queryDTO) {
-        return baseMapper.selectScenicVOList(page, queryDTO);
+        IPage<ScenicVO> voPage = baseMapper.selectScenicVOList(page, queryDTO);
+        // 评分保留一位小数
+        if (voPage != null && voPage.getRecords() != null) {
+            for (ScenicVO vo : voPage.getRecords()) {
+                if (vo.getAverageScore() != null) {
+                    vo.setAverageScore(Math.round(vo.getAverageScore() * 10) / 10.0);
+                }
+            }
+        }
+        return voPage;
     }
 
     @Override
     public List<ScenicVO> getScenicVOByTagId(Long tagId) {
-        return baseMapper.selectScenicVOByTagId(tagId);
+        List<ScenicVO> list = baseMapper.selectScenicVOByTagId(tagId);
+        return roundScore(list);
     }
 
     @Override
     public List<ScenicVO> getScenicVOByCategoryId(Long categoryId) {
-        return baseMapper.selectScenicVOByCategoryId(categoryId);
+        List<ScenicVO> list = baseMapper.selectScenicVOByCategoryId(categoryId);
+        return roundScore(list);
     }
 
     @Override
     public List<ScenicVO> getRecommendScenicVOList(Integer limit) {
-        return baseMapper.selectRecommendScenicVOList(limit);
+        List<ScenicVO> list = baseMapper.selectRecommendScenicVOList(limit);
+        return roundScore(list);
+    }
+    
+    // 评分保留一位小数
+    private List<ScenicVO> roundScore(List<ScenicVO> list) {
+        if (list != null) {
+            for (ScenicVO vo : list) {
+                if (vo.getAverageScore() != null) {
+                    vo.setAverageScore(Math.round(vo.getAverageScore() * 10) / 10.0);
+                }
+            }
+        }
+        return list;
     }
 
     @Override
