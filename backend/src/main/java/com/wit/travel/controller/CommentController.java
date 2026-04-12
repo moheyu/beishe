@@ -69,4 +69,26 @@ public class CommentController {
         List<CommentVO> voList = commentService.getCommentVOByUserId(userId);
         return Result.success(voList);
     }
+
+    @DeleteMapping("/{id}")
+    public Result<String> deleteComment(@PathVariable Long id) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return Result.error("请先登录");
+        }
+
+        UserComment comment = commentService.getById(id);
+        if (comment == null) {
+            return Result.error("评论不存在");
+        }
+
+        // 检查是否是评论所有者或管理员
+        if (!comment.getUserId().equals(userId)) {
+            // TODO: 管理员权限检查
+            return Result.error("无权删除此评论");
+        }
+
+        commentService.removeById(id);
+        return Result.success("删除成功");
+    }
 }
