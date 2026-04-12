@@ -41,7 +41,7 @@
         <el-col :xs="24" :sm="12" :md="8" v-for="item in routeList" :key="item.id">
           <div class="route-card" @click="$router.push(`/route/${item.id}`)">
             <div class="card-image-wrapper">
-              <el-image :src="getImageUrl(item.coverImage)" fit="cover" class="card-image" />
+              <el-image :src="getImageUrl(item.images && item.images.length > 0 ? item.images[0] : '')" fit="cover" class="card-image" />
               <div class="card-duration">
                 <el-icon><Calendar /></el-icon>
                 {{ item.duration }}天
