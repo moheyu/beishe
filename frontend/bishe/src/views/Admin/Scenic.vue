@@ -75,9 +75,12 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="70">
           <template #default="{ row }">
-            <el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">
-              {{ row.status === 1 ? '上架' : '下架' }}
-            </el-tag>
+            <el-switch
+              v-model="row.status"
+              :active-value="1"
+              :inactive-value="0"
+              @change="handleStatusChange(row)"
+            />
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180">
@@ -120,7 +123,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getAdminScenicList, deleteScenic, setRecommendLevel } from '@/api/scenic'
+import { getAdminScenicList, deleteScenic, updateScenic, setRecommendLevel } from '@/api/scenic'
 import { getScenicCategoryList } from '@/api/scenicCategory'
 import { getImageUrl as getImageUrlUtil } from '@/utils/image'
 
@@ -231,6 +234,17 @@ const handleDelete = (row) => {
       console.error('删除失败', error)
     }
   })
+}
+
+const handleStatusChange = async (row) => {
+  try {
+    await updateScenic(row.id, { status: row.status })
+    ElMessage.success(row.status === 1 ? '已上架' : '已下架')
+  } catch (error) {
+    console.error('更新状态失败', error)
+    // 恢复原状态
+    row.status = row.status === 1 ? 0 : 1
+  }
 }
 
 onMounted(() => {
