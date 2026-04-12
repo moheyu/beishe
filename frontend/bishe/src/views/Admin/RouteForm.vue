@@ -31,17 +31,17 @@
         </el-form-item>
         
         <el-form-item label="封面图片">
-          <el-upload
-            class="cover-uploader"
-            action="#"
-            :auto-upload="false"
-            :show-file-list="false"
-            :on-change="handleCoverChange"
-            v-loading="uploadLoading"
-          >
+          <div class="cover-uploader" @click="triggerFileInput">
             <el-image v-if="form.coverImage" :src="displayImage" fit="cover" class="cover-preview" />
             <el-icon v-else class="cover-uploader-icon"><Plus /></el-icon>
-          </el-upload>
+            <input 
+              ref="fileInput" 
+              type="file" 
+              accept="image/*" 
+              style="display: none" 
+              @change="handleCoverChange"
+            />
+          </div>
         </el-form-item>
         
         <el-form-item label="路线描述">
@@ -68,6 +68,7 @@ import { getImageUrl } from '@/utils/image'
 
 const route = useRoute()
 const router = useRouter()
+const fileInput = ref(null)
 const categories = ref([])
 const uploadLoading = ref(false)
 
@@ -111,10 +112,16 @@ const loadDetail = async () => {
   }
 }
 
-const handleCoverChange = (file) => {
+const triggerFileInput = () => {
+  fileInput.value?.click()
+}
+
+const handleCoverChange = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
   // 仅本地预览，不上传
-  form.coverImage = URL.createObjectURL(file.raw)
-  pendingUploadFile.value = file.raw
+  form.coverImage = URL.createObjectURL(file)
+  pendingUploadFile.value = file
 }
 
 const handleSubmit = async () => {

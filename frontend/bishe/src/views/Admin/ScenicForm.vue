@@ -27,17 +27,17 @@
         </el-form-item>
         
         <el-form-item label="封面图片">
-          <el-upload
-            class="cover-uploader"
-            action="#"
-            :auto-upload="false"
-            :show-file-list="false"
-            :on-change="handleCoverChange"
-            v-loading="uploadLoading"
-          >
+          <div class="cover-uploader" @click="triggerFileInput">
             <el-image v-if="displayImage" :src="displayImage" fit="cover" class="cover-preview" />
             <el-icon v-else class="cover-uploader-icon"><Plus /></el-icon>
-          </el-upload>
+            <input 
+              ref="fileInput" 
+              type="file" 
+              accept="image/*" 
+              style="display: none" 
+              @change="handleCoverChange"
+            />
+          </div>
         </el-form-item>
         
         <el-form-item label="景点描述">
@@ -64,6 +64,7 @@ import { uploadScenicImage } from '@/api/upload'
 
 const route = useRoute()
 const router = useRouter()
+const fileInput = ref(null)
 const categories = ref([])
 const uploadLoading = ref(false)
 
@@ -115,11 +116,17 @@ const loadDetail = async () => {
 // 存储待上传的文件
 const pendingUploadFile = ref(null)
 
-const handleCoverChange = (file) => {
+const triggerFileInput = () => {
+  fileInput.value?.click()
+}
+
+const handleCoverChange = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
   // 仅本地预览，不上传
-  const localUrl = URL.createObjectURL(file.raw)
+  const localUrl = URL.createObjectURL(file)
   form.coverImage = localUrl
-  pendingUploadFile.value = file.raw
+  pendingUploadFile.value = file
 }
 
 const handleSubmit = async () => {
