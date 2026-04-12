@@ -19,6 +19,8 @@
     </resultMap>
 
     <resultMap id="ScenicDetailVOMap" type="com.wit.travel.vo.ScenicDetailVO" extends="ScenicVOMap">
+        <result property="averageScore" column="avg_score"/>
+        <result property="ratingCount" column="rating_count"/>
         <collection property="tags" ofType="string">
             <result column="tag_name"/>
         </collection>
@@ -80,13 +82,20 @@
             uc.content AS comment_content,
             uc.create_time AS comment_create_time,
             u.username,
-            u.avatar
+            u.avatar,
+            IFNULL(ur.avg_score, s.score) AS avg_score,
+            ur.rating_count
         FROM scenic s
         LEFT JOIN scenic_category sc ON s.category_id = sc.id
         LEFT JOIN scenic_tag_relation str ON s.id = str.scenic_id
         LEFT JOIN scenic_tag st ON str.tag_id = st.id
         LEFT JOIN user_comment uc ON s.id = uc.target_id AND uc.is_audit = 1
         LEFT JOIN user u ON uc.user_id = u.id
+        LEFT JOIN (
+            SELECT scenic_id, AVG(score) AS avg_score, COUNT(*) AS rating_count
+            FROM user_rating
+            GROUP BY scenic_id
+        ) ur ON s.id = ur.scenic_id
         WHERE s.id = #{id}
     </select>
 

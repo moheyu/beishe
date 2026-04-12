@@ -66,7 +66,8 @@ public class RatingController {
         Integer ratingCount = userRatingService.getRatingCount(scenicId);
         
         Map<String, Object> result = new HashMap<>();
-        result.put("averageScore", avgScore != null ? avgScore : 0.0);
+        // 评分保留一位小数
+        result.put("averageScore", avgScore != null ? Math.round(avgScore * 10) / 10.0 : 0.0);
         result.put("ratingCount", ratingCount != null ? ratingCount : 0);
         
         if (userId != null) {

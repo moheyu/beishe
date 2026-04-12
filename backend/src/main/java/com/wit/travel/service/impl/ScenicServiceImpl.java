@@ -33,11 +33,9 @@ public class ScenicServiceImpl extends ServiceImpl<ScenicMapper, Scenic> impleme
     public ScenicDetailVO getScenicDetailVOById(Long id) {
         ScenicDetailVO detailVO = baseMapper.selectScenicDetailVOById(id);
         
-        if (detailVO != null) {
-            Double avgScore = userRatingService.getAverageScore(id);
-            Integer ratingCount = userRatingService.getRatingCount(id);
-            detailVO.setAverageScore(avgScore);
-            detailVO.setRatingCount(ratingCount);
+        if (detailVO != null && detailVO.getAverageScore() != null) {
+            // 评分保留一位小数
+            detailVO.setAverageScore(Math.round(detailVO.getAverageScore() * 10) / 10.0);
         }
         
         return detailVO;
