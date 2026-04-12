@@ -3,6 +3,8 @@ package com.wit.travel.dto;
 public class ScenicQueryDTO {
 
     private String name;
+    
+    private String keyword;  // 关键词搜索（名称或位置）
 
     private Long categoryId;
 
@@ -22,6 +24,14 @@ public class ScenicQueryDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public String getKeyword() {
+        return keyword;
+    }
+    
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
     }
 
     public Long getCategoryId() {
